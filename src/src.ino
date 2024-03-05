@@ -18,7 +18,7 @@
 #include <WiFi.h>
 
 
-uint8_t lcd_buf[192 * 96/4];
+uint8_t lcd_buf[256 * 160/4];
 
 
 const char* ntpServer = "pool.ntp.org";    //"ntp1.aliyun.com";   

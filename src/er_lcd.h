@@ -2,7 +2,6 @@
 #define _er_lcd_H_
 
 #include <SPI.h>
-#include <Arduino.h>
 #include <stdint.h>
 #include <stdio.h>
 

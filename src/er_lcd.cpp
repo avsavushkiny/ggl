@@ -10,13 +10,13 @@ void set_display_rotate(uint8_t ROTATE)
   DISPLAY_ROTATE = ROTATE;
   if ((ROTATE == ROTATE_0) || (ROTATE == ROTATE_180))
   {
-    WIDTH = 192;
-    HEIGHT = 96;
+    WIDTH = 256;
+    HEIGHT = 160;
   }
   if ((ROTATE == ROTATE_90) || (ROTATE == ROTATE_270))
   {
-    WIDTH = 96;
-    HEIGHT = 192;
+    WIDTH = 256;
+    HEIGHT = 160;
   }
 }
 
@@ -107,10 +107,10 @@ void er_lcd_begin()
 
   command(0x0C); // Data Format Select     DO=1; LSB on top
   command(0xf0); // Display Mode
-  dat(0x10);     // Monochrome Mode
+  dat(0x10);     // 10 -Monochrome Mode 11-Gray
   command(0xCA); // Display Control
   dat(0);
-  dat(95); // duty
+  dat(160); // duty
   dat(0x00);
   command(0xBC); // ata Scan Direction
   dat(0x00);     // MY=0

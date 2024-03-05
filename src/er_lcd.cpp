@@ -24,8 +24,8 @@ void command(uint8_t cmd)
 {
   digitalWrite(LCD_CS, LOW);
   digitalWrite(LCD_DC, LOW);
-  SPI.transfer(cmd); // Hardward SPI
-  // SPIWrite_byte(cmd);    //Software SPI
+  SPI.transfer(cmd);        // Hardward SPI
+  // SPIWrite_byte(cmd);    // Software SPIs
   digitalWrite(LCD_CS, HIGH);
 }
 

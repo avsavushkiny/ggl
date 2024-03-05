@@ -1,5 +1,4 @@
 #include "er_lcd.h"
-#include <Arduino.h>
 
 uint8_t WIDTH;
 uint8_t HEIGHT;

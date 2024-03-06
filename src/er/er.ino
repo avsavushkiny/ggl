@@ -81,6 +81,11 @@ void loop() {
   er_lcd_display_gray(lcd_buf);  
   delay(3000);
   
+  er_lcd_clear(lcd_buf);
+  er_lcd_bitmap(0, 0, client_bits, 32, 32, lcd_buf);
+  er_lcd_display(lcd_buf);
+  delay(3000);
+
 
   set_display_rotate(ROTATE_0);
  

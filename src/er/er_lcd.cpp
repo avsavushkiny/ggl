@@ -105,8 +105,9 @@ void er_lcd_begin()
   command(0x15);
   dat(0x00);
   dat(0xFF); // xe 256
-  command(0xBC);
-  dat(0x00);
+  
+  command(0xBC); // Data Scan Direction
+  dat(0x02);
   dat(0xA6);
 
   command(0x30); // Extension Command 1

@@ -2,11 +2,9 @@
 
 int WIDTH;
 int HEIGHT;
-uint8_t DISPLAY_ROTATE;
+int DISPLAY_ROTATE;
 
-
-
-void set_display_rotate(uint8_t ROTATE)
+void set_display_rotate(int ROTATE)
 {
   DISPLAY_ROTATE = ROTATE;
   if ((ROTATE == ROTATE_0) || (ROTATE == ROTATE_180))
@@ -21,7 +19,7 @@ void set_display_rotate(uint8_t ROTATE)
   }
 }
 
-void command(uint8_t cmd)
+void command(int cmd)
 {
   digitalWrite(LCD_CS, LOW);
   digitalWrite(LCD_DC, LOW);
@@ -30,7 +28,7 @@ void command(uint8_t cmd)
   digitalWrite(LCD_CS, HIGH);
 }
 
-void dat(uint8_t dat)
+void dat(int dat)
 {
   digitalWrite(LCD_CS, LOW);
   digitalWrite(LCD_DC, HIGH);
@@ -39,7 +37,7 @@ void dat(uint8_t dat)
   digitalWrite(LCD_CS, HIGH);
 }
 
-void SPIWrite_byte(uint8_t dat)
+void SPIWrite_byte(int dat)
 {
   digitalWrite(LCD_SCK, LOW);
   for (int i = 0; i < 8; i++)
@@ -57,7 +55,7 @@ void SPIWrite_byte(uint8_t dat)
 }
 
 /*
-void SPIWrite(int *buffer, int bufferLength) {
+void SPIWrite(uint8_t *buffer, int bufferLength) {
     int i;
     for (i = 0; i < bufferLength; i++) {
         SPI.transfer(buffer[i]);
@@ -67,7 +65,7 @@ void SPIWrite(int *buffer, int bufferLength) {
 
 void er_lcd_begin()
 {
-  uint16_t Contrast = 243;
+  uint16_t Contrast = 240;
   pinMode(LCD_BL, OUTPUT);
   pinMode(LCD_RST, OUTPUT);
   pinMode(LCD_DC, OUTPUT);
@@ -121,7 +119,7 @@ void er_lcd_begin()
 
   command(0x0C); // Data Format Select     DO=1; LSB on top
   command(0xf0); // Display Mode
-  dat(0x11);     // Monochrome Mode
+  dat(0x10);     // Monochrome Mode
 
   command(0xCA); // Display Control
   dat(0x00);
@@ -130,72 +128,7 @@ void er_lcd_begin()
   command(0xBC); // ata Scan Direction
   dat(0x00);     // MY=0
 
-  command(0xaf); // Display On*/
-
-  /*command(0x30);
-  command(0x94);
-  command(0x31);
-  command(0xD7);
-  dat(0x9F);
-  
-  command(0x32);
-  dat(0x00);
-  dat(0x01);
-  dat(0x00);
-
-  command(0x20);
-  dat(0x01);
-  dat(0x03);
-  dat(0x05);
-  dat(0x07);
-  dat(0x09);
-  dat(0x0b);
-  dat(0x0d);
-  dat(0x10);
-  dat(0x11);
-  dat(0x13);
-  dat(0x15);
-  dat(0x17);
-  dat(0x19);
-  dat(0x1b);
-  dat(0x1d);
-  dat(0x1f);
-
-  command(0x31); //ex1
-  command(0xf0);
-  dat(0x0f);
-  dat(0x0f);
-  dat(0x0f);
-  dat(0x0f);
-
-  command(0x30); //ex0
-  command(0x75);
-  dat(0x00);
-  dat(0x28);
-  command(0x15);
-  dat(0x00);
-  dat(0xFF);     //xe 256
-  command(0xBC);
-  dat(0x00);
-  dat(0xA6);
-
-  command(0xca); //control
-  dat(0x00);
-  dat(0x9f);     //duty 160
-  dat(0x20);
-
-  command(0xF0); //display mode
-  dat(0x10);     //10-1bit
-  
-  command(0x81); //ev control
-  dat(Contrast & 0x3F);
-  dat((Contrast >> 6) & 0x07);
-
-  command(0x20); //power control
-  dat(0xd1);     //d0 regular, d1 follower, d3 bopste
-  delay(20);
-  command(0xaf); //display on*/
-  
+  command(0xaf); // Display On
 
   digitalWrite(LCD_BL, LOW);
 }
@@ -203,7 +136,7 @@ void er_lcd_begin()
 void er_lcd_clear(int *buffer)
 {
   int i;
-  for (i = 0; i < WIDTH * (HEIGHT/4); i++)
+  for (i = 0; i <= WIDTH * (HEIGHT/4); i++)
   {
     buffer[i] = 0;
   }
@@ -257,10 +190,10 @@ void er_lcd_pixel(int x, int y, char color, int *buffer)
     buffer[x + (y / 8) * 256] &= ~(1 << (y % 8));
 }
 
-void er_lcd_char1616(uint8_t x, uint8_t y, uint8_t chChar, int *buffer)
+void er_lcd_char1616(int x, int y, int chChar, int *buffer)
 {
-  uint8_t i, j;
-  uint8_t chTemp = 0, y0 = y, chMode = 0;
+  int i, j;
+  int chTemp = 0, y0 = y, chMode = 0;
 
   for (i = 0; i < 32; i++)
   {
@@ -320,7 +253,7 @@ void er_lcd_char(unsigned char x, unsigned char y, char acsii, char size, char m
   }
 }
 
-void er_lcd_string(uint8_t x, uint8_t y, const char *pString, uint8_t Size, uint8_t Mode, int *buffer)
+void er_lcd_string(int x, int y, const char *pString, int Size, int Mode, int *buffer)
 {
   while (*pString != '\0')
   {
@@ -340,10 +273,10 @@ void er_lcd_string(uint8_t x, uint8_t y, const char *pString, uint8_t Size, uint
   }
 }
 
-void er_lcd_char3216(uint8_t x, uint8_t y, uint8_t chChar, int *buffer)
+void er_lcd_char3216(int x, int y, int chChar, int *buffer)
 {
-  uint8_t i, j;
-  uint8_t chTemp = 0, y0 = y, chMode = 0;
+  int i, j;
+  int chTemp = 0, y0 = y, chMode = 0;
 
   for (i = 0; i < 64; i++)
   {
@@ -364,9 +297,9 @@ void er_lcd_char3216(uint8_t x, uint8_t y, uint8_t chChar, int *buffer)
   }
 }
 
-void er_lcd_bitmap(uint8_t x, uint8_t y, const uint8_t *pBmp, uint8_t chWidth, uint8_t chHeight, int *buffer)
+void er_lcd_bitmap(int x, int y, const int *pBmp, int chWidth, int chHeight, int *buffer)
 {
-  uint8_t i, j, byteWidth = (chWidth + 7) / 8;
+  int i, j, byteWidth = (chWidth + 7) / 8;
   for (j = 0; j < chHeight; j++)
   {
     for (i = 0; i < chWidth; i++)
@@ -396,7 +329,7 @@ void er_lcd_display(int *pBuf)
   dat(0x28);
   command(0x5c);
 
-  for (page = 0; page < 160 / 4; page++)
+  for (page = 0; page < 160 / 8; page++)
   {
     for (i = 0; i < 256; i++)
     {
@@ -408,7 +341,7 @@ void er_lcd_display(int *pBuf)
 void er_lcd_pixel_gray(int x, int y, char color, int *buffer)
 {
   set_display_rotate(ROTATE_0);
-  if (x > 256 || y > 160 * 2)
+  if (x > 256 || y > 256 * 2)
     return;
   if (color)
     buffer[x + (y / 8) * 256] |= 1 << (y % 8);
@@ -416,16 +349,10 @@ void er_lcd_pixel_gray(int x, int y, char color, int *buffer)
     buffer[x + (y / 8) * 256] &= ~(1 << (y % 8));
 }
 
-/*
-static GUI_CONST_STORAGE GUI_COLOR Colorsgray_pix[] = {
-     0x00,0x55,0xAA,0xFF
-};
-*/
-
-void er_lcd_bitmap_gray(uint8_t x, uint8_t y, const uint8_t *pBmp, uint8_t chWidth, uint8_t chHeight, int *buffer)
+void er_lcd_bitmap_gray(int x, int y, const int *pBmp, int chWidth, int chHeight, int *buffer)
 {
   uint16_t i, j, k;
-  uint8_t page = chHeight * 2 / 8;
+  int page = chHeight * 2 / 8;
 
   for (k = 0; k < page; k++)
   {
@@ -444,10 +371,10 @@ void er_lcd_bitmap_gray(uint8_t x, uint8_t y, const uint8_t *pBmp, uint8_t chWid
 
 void er_lcd_display_gray(int *pBuf)
 {
-  uint8_t page, i;
+  int page, i;
 
   command(0xf0); // Display Mode
-  dat(0x11);     // 2bit Mode
+  dat(0x11);     // 4Gray  Mode
 
   command(0x15);
   dat(0x00);
@@ -470,11 +397,11 @@ void er_lcd_display_gray(int *pBuf)
 void demo_game(int *buffer)
 {
   uint16_t cs = 200;
-  uint8_t r = 5;          // Radius
-  uint8_t i = 3;          // Stepping variables
-  uint8_t x = 5, y = 5;   // Starting position
-  uint8_t dx = i, dy = i; // Stepping
-  uint8_t x1, y1;         // Save the last position
+  int r = 5;          // Radius
+  int i = 3;          // Stepping variables
+  int x = 5, y = 5;   // Starting position
+  int dx = i, dy = i; // Stepping
+  int x1, y1;         // Save the last position
 
   while (cs--)
   {
@@ -560,7 +487,7 @@ void drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color, int *buffe
   }
 }
 
-void drawCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, uint16_t color, int *buffer)
+void drawCircleHelper(int16_t x0, int16_t y0, int16_t r, int cornername, uint16_t color, int *buffer)
 {
   int16_t f = 1 - r;
   int16_t ddF_x = 1;
@@ -609,7 +536,7 @@ void fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color, int *buffer)
 }
 
 // Used to do circles and roundrects
-void fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, uint16_t color, int *buffer)
+void fillCircleHelper(int16_t x0, int16_t y0, int16_t r, int cornername, int16_t delta, uint16_t color, int *buffer)
 {
 
   int16_t f = 1 - r;
@@ -855,7 +782,7 @@ void fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, in
 void testLines(int *buffer)
 {
   int x1, y1, x2, y2, w = WIDTH, h = HEIGHT;
-  uint8_t color = 1;
+  int color = 1;
   x1 = y1 = 0;
   y2 = h - 1;
 
@@ -1000,7 +927,7 @@ void testFilledRects(int *buffer)
   }
 }
 
-void testFilledCircles(uint8_t radius, int *buffer)
+void testFilledCircles(int radius, int *buffer)
 {
   int x, y, w = WIDTH, h = HEIGHT, r2 = radius * 2;
 
@@ -1015,7 +942,7 @@ void testFilledCircles(uint8_t radius, int *buffer)
   }
 }
 
-void testCircles(uint8_t radius, int *buffer)
+void testCircles(int radius, int *buffer)
 {
   int x, y, w = WIDTH, h = HEIGHT, r2 = radius * 2;
 

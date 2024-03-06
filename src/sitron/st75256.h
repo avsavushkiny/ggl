@@ -19,7 +19,7 @@ class st75256 : public Adafruit_GFX {
    public:
     /* Setup */
     st75256(int width, int height) : Adafruit_GFX(width, height), m_active_width(width), m_active_height(height) {}
-    int setup(TwoWire& i2c_library, const uint8_t i2c_address, const int pin_res, uint8_t* const buffer);
+    int setup(TwoWire& i2c_library, const int i2c_address, const int pin_res, int* const buffer);
     // int setup(TwoWire& i2c_library, const uint8_t i2c_address, const int pin_res);
     bool detect(void);
     int brightness_set(const float ratio);
@@ -53,17 +53,17 @@ class st75256 : public Adafruit_GFX {
 
         /* Commandset for extension 2 (starts at section 9.2.31 page 77) */
     };
-    int command_send(const uint8_t command);
-    int data_send(const uint8_t data);
-    int data_send(uint8_t* const data, const size_t length);
+    int command_send(const int command);
+    int data_send(const int data);
+    int data_send(int* const data, const size_t length);
 
    protected:
     const size_t m_gdram_width = 256, m_gdram_height = 168;  //!<
     size_t m_active_width, m_active_height;                  //!<
     size_t m_blanking_h;                                     //!< Number of empty pixel columns, starting from the left.
     TwoWire* m_i2c_library = NULL;
-    uint8_t m_i2c_address = 0;
-    uint8_t* m_buffer = NULL;
+    int m_i2c_address = 0;
+    int* m_buffer = NULL;
 
     enum interface {
         INTERFACE_NONE,

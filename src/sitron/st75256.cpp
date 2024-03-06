@@ -8,7 +8,7 @@
  * @param[in] pin_res
  * @param[in] buffer
  */
-int st75256::setup(TwoWire& i2c_library, const uint8_t i2c_address, const int pin_res, uint8_t* const buffer) {
+int st75256::setup(TwoWire& i2c_library, const int i2c_address, const int pin_res, int* const buffer) {
 
     /* Ensure i2c address is valid */
     if ((i2c_address != 0x3C) &&  //
@@ -443,7 +443,7 @@ int st75256::display(void) {
  *
  * @param[in] command
  */
-int st75256::command_send(const uint8_t command) {
+int st75256::command_send(const int command) {
     int res;
     switch (m_interface) {
 
@@ -469,7 +469,7 @@ int st75256::command_send(const uint8_t command) {
 /**
  *
  */
-int st75256::data_send(const uint8_t data) {
+int st75256::data_send(const int data) {
     int res;
     switch (m_interface) {
 
@@ -495,7 +495,7 @@ int st75256::data_send(const uint8_t data) {
 /**
  *
  */
-int st75256::data_send(uint8_t* const data, const size_t length) {
+int st75256::data_send(int* const data, const size_t length) {
     int res;
     switch (m_interface) {
 

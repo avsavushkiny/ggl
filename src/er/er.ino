@@ -2,7 +2,7 @@
 #include <WiFi.h>
 
 
-int lcd_buf[256 * (160/4)];
+int lcd_buf[256 * 160/4];
 
 
 const char* ntpServer = "pool.ntp.org";    //"ntp1.aliyun.com";   
@@ -24,7 +24,7 @@ void setup() {
 
 void loop() {
 
-  /*set_display_rotate(ROTATE_0);
+  set_display_rotate(ROTATE_0);
   er_lcd_clear(lcd_buf);
   er_lcd_string(0, 0, "Hollow!", 12, 1, lcd_buf); 
   er_lcd_string(0, HEIGHT/2,  "buydisplay.com", 12, 1, lcd_buf);   
@@ -56,36 +56,39 @@ void loop() {
   er_lcd_string(0, HEIGHT/2,  "buydisplay.com", 12, 1, lcd_buf); 
   er_lcd_string(0, HEIGHT-12, "EastRising", 12, 1, lcd_buf);    
   er_lcd_display(lcd_buf);
-  delay(1000);
-  */
+  delay(1000); 
+  
  
 
-  /*set_display_rotate(ROTATE_0);
+  set_display_rotate(ROTATE_0);
   er_lcd_clear(lcd_buf);
   er_lcd_bitmap(0, 0, PIC1, 192, 96, lcd_buf);
   er_lcd_display(lcd_buf);
-  delay(3000);*/  
+  delay(3000);  
 
   er_lcd_clear(lcd_buf);
   er_lcd_bitmap(0, 0, PIC2, 192, 96, lcd_buf);
   er_lcd_display(lcd_buf);
-  delay(6000);
+  delay(3000);
  
   er_lcd_clear(lcd_buf);
-  er_lcd_bitmap_gray(0, 0, _pix2, 192, 96, lcd_buf);
+  er_lcd_bitmap_gray(0, 0, PIC3, 192, 96, lcd_buf);
   er_lcd_display_gray(lcd_buf);  
-  delay(6000);
+  delay(3000);
+
+  er_lcd_clear(lcd_buf);
+  er_lcd_bitmap_gray(0, 0, gray_pix, 192, 96, lcd_buf);
+  er_lcd_display_gray(lcd_buf);  
+  delay(3000);
   
 
   set_display_rotate(ROTATE_0);
  
   er_lcd_clear(lcd_buf);
   demo_sine(lcd_buf);
-  er_lcd_display_gray(lcd_buf);
-
-  er_lcd_clear(lcd_buf); delay(2500);
+   
+  er_lcd_clear(lcd_buf);
   testLines(lcd_buf);
-  er_lcd_display(lcd_buf);
  
   /*er_lcd_clear(lcd_buf);
   testFastLines(lcd_buf);
@@ -100,9 +103,9 @@ void loop() {
   testFilledCircles(10, lcd_buf);
 
   er_lcd_clear(lcd_buf);
-  testCircles(10,lcd_buf);*/
+  testCircles(10,lcd_buf);
 
-  /*er_lcd_clear(lcd_buf); 
+  er_lcd_clear(lcd_buf); 
   testTriangles(lcd_buf);
 
   er_lcd_clear(lcd_buf);
@@ -118,7 +121,7 @@ void loop() {
   demo_game(lcd_buf);
 
 
-
+/*
   set_display_rotate(ROTATE_90);
  
   er_lcd_clear(lcd_buf);
@@ -155,7 +158,7 @@ void loop() {
   er_lcd_clear(lcd_buf);
   testFilledRoundRects(lcd_buf); 
 
-*/
+
 /*
   Serial.printf("Connecting to %s ", ssid);
   set_display_rotate(ROTATE_0);
@@ -235,5 +238,5 @@ const String MONTH_NAMES[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "
          delay(1000);//Analog clock 1s   
   
     }
-  */
+   */
 }

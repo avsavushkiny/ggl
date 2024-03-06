@@ -1,32 +1,16 @@
-/*  == Hardward SPI to ESP32  ==
-    LCD   =>    ESP32
-  *1,2,3,4   NC  
-  *5. LEDA      ->    3.3V  or 22     
-  *6. VSS       ->    GND
-  *7. VDD       ->    3.3
-  *8. A0/DC     ->    17  
-  *9. RSTB      ->    16    
-  *10. CS       ->    5
-  *11,12,13,14  ->    3.3V 
-  *15,16,17     ->    23 
-  *18. DB0      ->    18
-  *19,20        ->    3.3V   
-*/
-
-
 #include "er_lcd.h"
 #include <WiFi.h>
 
 
-uint8_t lcd_buf[256 * 160/4];
+int lcd_buf[256 * (160/4)];
 
 
 const char* ntpServer = "pool.ntp.org";    //"ntp1.aliyun.com";   
 const long  gmtOffset_sec = 28800;
 const int   daylightOffset_sec = 0;
 
-const char *ssid = "RT-GPON-6089"; //"your ssid";
-const char *password = "u7PxRkFQ";   //"your password";
+const char *ssid = "EASTRISING-2"; //"your ssid";
+const char *password = "er33503873";   //"your password";
 
 struct tm timeinfo;
 
@@ -40,7 +24,7 @@ void setup() {
 
 void loop() {
 
-  set_display_rotate(ROTATE_0);
+  /*set_display_rotate(ROTATE_0);
   er_lcd_clear(lcd_buf);
   er_lcd_string(0, 0, "Hollow!", 12, 1, lcd_buf); 
   er_lcd_string(0, HEIGHT/2,  "buydisplay.com", 12, 1, lcd_buf);   
@@ -72,36 +56,38 @@ void loop() {
   er_lcd_string(0, HEIGHT/2,  "buydisplay.com", 12, 1, lcd_buf); 
   er_lcd_string(0, HEIGHT-12, "EastRising", 12, 1, lcd_buf);    
   er_lcd_display(lcd_buf);
-  delay(1000); 
-  
+  delay(1000);
+  */
  
 
-  set_display_rotate(ROTATE_0);
+  /*set_display_rotate(ROTATE_0);
   er_lcd_clear(lcd_buf);
   er_lcd_bitmap(0, 0, PIC1, 192, 96, lcd_buf);
   er_lcd_display(lcd_buf);
-  delay(3000);  
+  delay(3000);*/  
 
   er_lcd_clear(lcd_buf);
   er_lcd_bitmap(0, 0, PIC2, 192, 96, lcd_buf);
   er_lcd_display(lcd_buf);
-  delay(3000);
+  delay(6000);
  
   er_lcd_clear(lcd_buf);
-  er_lcd_bitmap_gray(0, 0, PIC3, 192, 96, lcd_buf);
+  er_lcd_bitmap_gray(0, 0, _pix2, 192, 96, lcd_buf);
   er_lcd_display_gray(lcd_buf);  
-  delay(3000);
+  delay(6000);
   
 
   set_display_rotate(ROTATE_0);
  
   er_lcd_clear(lcd_buf);
   demo_sine(lcd_buf);
-   
-  er_lcd_clear(lcd_buf);
+  er_lcd_display_gray(lcd_buf);
+
+  er_lcd_clear(lcd_buf); delay(2500);
   testLines(lcd_buf);
+  er_lcd_display(lcd_buf);
  
-  er_lcd_clear(lcd_buf);
+  /*er_lcd_clear(lcd_buf);
   testFastLines(lcd_buf);
  
   er_lcd_clear(lcd_buf);
@@ -114,9 +100,9 @@ void loop() {
   testFilledCircles(10, lcd_buf);
 
   er_lcd_clear(lcd_buf);
-  testCircles(10,lcd_buf);
+  testCircles(10,lcd_buf);*/
 
-  er_lcd_clear(lcd_buf); 
+  /*er_lcd_clear(lcd_buf); 
   testTriangles(lcd_buf);
 
   er_lcd_clear(lcd_buf);
@@ -169,8 +155,8 @@ void loop() {
   er_lcd_clear(lcd_buf);
   testFilledRoundRects(lcd_buf); 
 
-
-
+*/
+/*
   Serial.printf("Connecting to %s ", ssid);
   set_display_rotate(ROTATE_0);
   er_lcd_clear(lcd_buf);
@@ -249,5 +235,5 @@ const String MONTH_NAMES[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "
          delay(1000);//Analog clock 1s   
   
     }
-   
+  */
 }

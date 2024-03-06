@@ -1,9 +1,10 @@
 #include "er_lcd.h"
-#include <Arduino.h>
 
-uint8_t WIDTH;
-uint8_t HEIGHT;
+int WIDTH;
+int HEIGHT;
 uint8_t DISPLAY_ROTATE;
+
+
 
 void set_display_rotate(uint8_t ROTATE)
 {
@@ -24,8 +25,8 @@ void command(uint8_t cmd)
 {
   digitalWrite(LCD_CS, LOW);
   digitalWrite(LCD_DC, LOW);
-  SPI.transfer(cmd);        // Hardward SPI
-  // SPIWrite_byte(cmd);    // Software SPIs
+  SPI.transfer(cmd); // Hardward SPI
+  // SPIWrite_byte(cmd);    //Software SPI
   digitalWrite(LCD_CS, HIGH);
 }
 
@@ -56,7 +57,7 @@ void SPIWrite_byte(uint8_t dat)
 }
 
 /*
-void SPIWrite(uint8_t *buffer, int bufferLength) {
+void SPIWrite(int *buffer, int bufferLength) {
     int i;
     for (i = 0; i < bufferLength; i++) {
         SPI.transfer(buffer[i]);
@@ -66,7 +67,7 @@ void SPIWrite(uint8_t *buffer, int bufferLength) {
 
 void er_lcd_begin()
 {
-  uint16_t Contrast = 202;
+  uint16_t Contrast = 243;
   pinMode(LCD_BL, OUTPUT);
   pinMode(LCD_RST, OUTPUT);
   pinMode(LCD_DC, OUTPUT);
@@ -90,6 +91,7 @@ void er_lcd_begin()
   command(0x30); // Extension Command 1
   command(0x94); // Sleep Out
   delay(50);
+
   command(0x31); // Extension Command 2
   command(0x32); // Analog Circuit Set
   dat(0x00);
@@ -98,38 +100,116 @@ void er_lcd_begin()
   command(0x51); // Booster Level x10
   dat(0xFA);     // 8X
 
+  command(0x30);
+  command(0x75);
+  dat(0x00);
+  dat(0x28);
+  command(0x15);
+  dat(0x00);
+  dat(0xFF); // xe 256
+  command(0xBC);
+  dat(0x00);
+  dat(0xA6);
+
   command(0x30); // Extension Command 1
   command(0x20); // Power Control
   dat(0x0b);     // VB ON ; VR,VF ON
+
   command(0x81); // Vop Control
   dat(Contrast & 0x3F);
   dat((Contrast >> 6) & 0x07);
 
   command(0x0C); // Data Format Select     DO=1; LSB on top
   command(0xf0); // Display Mode
-  dat(0x10);     // 10 -Monochrome Mode 11-Gray
+  dat(0x11);     // Monochrome Mode
+
   command(0xCA); // Display Control
-  dat(0);
-  dat(160); // duty
+  dat(0x00);
+  dat(0x9f); // duty 160
   dat(0x00);
   command(0xBC); // ata Scan Direction
   dat(0x00);     // MY=0
 
-  command(0xaf); // Display On
+  command(0xaf); // Display On*/
 
-  digitalWrite(LCD_BL, HIGH);
+  /*command(0x30);
+  command(0x94);
+  command(0x31);
+  command(0xD7);
+  dat(0x9F);
+  
+  command(0x32);
+  dat(0x00);
+  dat(0x01);
+  dat(0x00);
+
+  command(0x20);
+  dat(0x01);
+  dat(0x03);
+  dat(0x05);
+  dat(0x07);
+  dat(0x09);
+  dat(0x0b);
+  dat(0x0d);
+  dat(0x10);
+  dat(0x11);
+  dat(0x13);
+  dat(0x15);
+  dat(0x17);
+  dat(0x19);
+  dat(0x1b);
+  dat(0x1d);
+  dat(0x1f);
+
+  command(0x31); //ex1
+  command(0xf0);
+  dat(0x0f);
+  dat(0x0f);
+  dat(0x0f);
+  dat(0x0f);
+
+  command(0x30); //ex0
+  command(0x75);
+  dat(0x00);
+  dat(0x28);
+  command(0x15);
+  dat(0x00);
+  dat(0xFF);     //xe 256
+  command(0xBC);
+  dat(0x00);
+  dat(0xA6);
+
+  command(0xca); //control
+  dat(0x00);
+  dat(0x9f);     //duty 160
+  dat(0x20);
+
+  command(0xF0); //display mode
+  dat(0x10);     //10-1bit
+  
+  command(0x81); //ev control
+  dat(Contrast & 0x3F);
+  dat((Contrast >> 6) & 0x07);
+
+  command(0x20); //power control
+  dat(0xd1);     //d0 regular, d1 follower, d3 bopste
+  delay(20);
+  command(0xaf); //display on*/
+  
+
+  digitalWrite(LCD_BL, LOW);
 }
 
-void er_lcd_clear(uint8_t *buffer)
+void er_lcd_clear(int *buffer)
 {
   int i;
-  for (i = 0; i < WIDTH * HEIGHT / 4; i++)
+  for (i = 0; i < WIDTH * (HEIGHT/4); i++)
   {
     buffer[i] = 0;
   }
 }
 
-void er_lcd_pixel(int x, int y, char color, uint8_t *buffer)
+void er_lcd_pixel(int x, int y, char color, int *buffer)
 {
 
   int point_temp;
@@ -147,7 +227,7 @@ void er_lcd_pixel(int x, int y, char color, uint8_t *buffer)
       return;
     }
     point_temp = x;
-    x = WIDTH - y - 1;
+    x = 256 - y - 1;
     y = point_temp;
   }
   else if (DISPLAY_ROTATE == ROTATE_180)
@@ -156,8 +236,8 @@ void er_lcd_pixel(int x, int y, char color, uint8_t *buffer)
     {
       return;
     }
-    x = WIDTH - x - 1;
-    y = HEIGHT - y - 1;
+    x = 256 - x - 1;
+    y = 160 - y - 1;
   }
   else if (DISPLAY_ROTATE == ROTATE_270)
   {
@@ -167,17 +247,17 @@ void er_lcd_pixel(int x, int y, char color, uint8_t *buffer)
     }
     point_temp = x;
     x = y;
-    y = HEIGHT - point_temp - 1;
+    y = 160 - point_temp - 1;
   }
 
   // if(x > WIDTH || y > HEIGHT)return ;
   if (color)
-    buffer[x + (y / 8) * WIDTH] |= 1 << (y % 8);
+    buffer[x + (y / 8) * 256] |= 1 << (y % 8);
   else
-    buffer[x + (y / 8) * WIDTH] &= ~(1 << (y % 8));
+    buffer[x + (y / 8) * 256] &= ~(1 << (y % 8));
 }
 
-void er_lcd_char1616(uint8_t x, uint8_t y, uint8_t chChar, uint8_t *buffer)
+void er_lcd_char1616(uint8_t x, uint8_t y, uint8_t chChar, int *buffer)
 {
   uint8_t i, j;
   uint8_t chTemp = 0, y0 = y, chMode = 0;
@@ -201,7 +281,7 @@ void er_lcd_char1616(uint8_t x, uint8_t y, uint8_t chChar, uint8_t *buffer)
   }
 }
 
-void er_lcd_char(unsigned char x, unsigned char y, char acsii, char size, char mode, uint8_t *buffer)
+void er_lcd_char(unsigned char x, unsigned char y, char acsii, char size, char mode, int *buffer)
 {
   unsigned char i, j, y0 = y;
   char temp;
@@ -240,7 +320,7 @@ void er_lcd_char(unsigned char x, unsigned char y, char acsii, char size, char m
   }
 }
 
-void er_lcd_string(uint8_t x, uint8_t y, const char *pString, uint8_t Size, uint8_t Mode, uint8_t *buffer)
+void er_lcd_string(uint8_t x, uint8_t y, const char *pString, uint8_t Size, uint8_t Mode, int *buffer)
 {
   while (*pString != '\0')
   {
@@ -260,7 +340,7 @@ void er_lcd_string(uint8_t x, uint8_t y, const char *pString, uint8_t Size, uint
   }
 }
 
-void er_lcd_char3216(uint8_t x, uint8_t y, uint8_t chChar, uint8_t *buffer)
+void er_lcd_char3216(uint8_t x, uint8_t y, uint8_t chChar, int *buffer)
 {
   uint8_t i, j;
   uint8_t chTemp = 0, y0 = y, chMode = 0;
@@ -284,7 +364,7 @@ void er_lcd_char3216(uint8_t x, uint8_t y, uint8_t chChar, uint8_t *buffer)
   }
 }
 
-void er_lcd_bitmap(uint8_t x, uint8_t y, const uint8_t *pBmp, uint8_t chWidth, uint8_t chHeight, uint8_t *buffer)
+void er_lcd_bitmap(uint8_t x, uint8_t y, const uint8_t *pBmp, uint8_t chWidth, uint8_t chHeight, int *buffer)
 {
   uint8_t i, j, byteWidth = (chWidth + 7) / 8;
   for (j = 0; j < chHeight; j++)
@@ -301,42 +381,48 @@ void er_lcd_bitmap(uint8_t x, uint8_t y, const uint8_t *pBmp, uint8_t chWidth, u
   }
 }
 
-void er_lcd_display(uint8_t *pBuf)
+void er_lcd_display(int *pBuf)
 {
-  uint8_t page, i;
+  int page, i;
 
   command(0xf0); // Display Mode
   dat(0x10);     // Monochrome Mode
 
   command(0x15);
-  dat(0);
-  dat(191);
+  dat(0x00);
+  dat(0xff);
   command(0x75);
-  dat(0);
-  dat(11);
+  dat(0x00);
+  dat(0x28);
   command(0x5c);
 
-  for (page = 0; page < HEIGHT / 8; page++)
+  for (page = 0; page < 160 / 4; page++)
   {
-    for (i = 0; i < WIDTH; i++)
+    for (i = 0; i < 256; i++)
     {
-      dat(pBuf[i + (page * WIDTH)]);
+      dat(pBuf[i + (page * 256)]);
     }
   }
 }
 
-void er_lcd_pixel_gray(int x, int y, char color, uint8_t *buffer)
+void er_lcd_pixel_gray(int x, int y, char color, int *buffer)
 {
   set_display_rotate(ROTATE_0);
-  if (x > WIDTH || y > HEIGHT * 2)
+  if (x > 256 || y > 160 * 2)
     return;
   if (color)
-    buffer[x + (y / 8) * WIDTH] |= 1 << (y % 8);
+    buffer[x + (y / 8) * 256] |= 1 << (y % 8);
   else
-    buffer[x + (y / 8) * WIDTH] &= ~(1 << (y % 8));
+    buffer[x + (y / 8) * 256] &= ~(1 << (y % 8));
 }
 
-void er_lcd_bitmap_gray(uint8_t x, uint8_t y, const uint8_t *pBmp, uint8_t chWidth, uint8_t chHeight, uint8_t *buffer)
+/*
+static GUI_CONST_STORAGE GUI_COLOR Colorsgray_pix[] = {
+     0x00,0x55,0xAA,0xFF
+};
+*/
+
+void er_lcd_bitmap_gray(uint8_t x, uint8_t y, const uint8_t *pBmp, uint8_t chWidth, uint8_t chHeight, int *buffer)
 {
   uint16_t i, j, k;
   uint8_t page = chHeight * 2 / 8;
@@ -356,31 +442,32 @@ void er_lcd_bitmap_gray(uint8_t x, uint8_t y, const uint8_t *pBmp, uint8_t chWid
   }
 }
 
-void er_lcd_display_gray(uint8_t *pBuf)
+void er_lcd_display_gray(int *pBuf)
 {
   uint8_t page, i;
 
   command(0xf0); // Display Mode
-  dat(0x11);     // 4Gray  Mode
+  dat(0x11);     // 2bit Mode
+
   command(0x15);
-  dat(0);
-  dat(191);
+  dat(0x00);
+  dat(0xff);
   command(0x75);
-  dat(0);
-  dat(23);
+  dat(0x00);
+  dat(0x28);
   command(0x5c);
 
-  for (page = 0; page < HEIGHT / 4; page++)
+  for (page = 0; page < 160 / 4; page++)
   {
-    for (i = 0; i < WIDTH; i++)
+    for (i = 0; i < 256; i++)
     {
 
-      dat(pBuf[i + (page * WIDTH)]);
+      dat(pBuf[i + (page * 256)]);
     }
   }
 }
 
-void demo_game(uint8_t *buffer)
+void demo_game(int *buffer)
 {
   uint16_t cs = 200;
   uint8_t r = 5;          // Radius
@@ -410,7 +497,7 @@ void demo_game(uint8_t *buffer)
   }
 }
 
-void demo_sine(uint8_t *buffer)
+void demo_sine(int *buffer)
 {
   drawFastHLine(0, HEIGHT / 2, WIDTH, 1, buffer);
   drawFastVLine(WIDTH / 2, 0, HEIGHT, 1, buffer);
@@ -423,7 +510,7 @@ void demo_sine(uint8_t *buffer)
   delay(1000);
 }
 
-void drawSine(uint16_t y, uint16_t a, uint16_t n, uint16_t color, uint8_t *buffer)
+void drawSine(uint16_t y, uint16_t a, uint16_t n, uint16_t color, int *buffer)
 {
   uint16_t x1 = 0, x2;
   uint16_t y1 = HEIGHT / 2, y2;
@@ -437,7 +524,7 @@ void drawSine(uint16_t y, uint16_t a, uint16_t n, uint16_t color, uint8_t *buffe
 }
 
 // Draw a circle outline
-void drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color, uint8_t *buffer)
+void drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color, int *buffer)
 {
   int16_t f = 1 - r;
   int16_t ddF_x = 1;
@@ -473,7 +560,7 @@ void drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color, uint8_t *b
   }
 }
 
-void drawCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, uint16_t color, uint8_t *buffer)
+void drawCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, uint16_t color, int *buffer)
 {
   int16_t f = 1 - r;
   int16_t ddF_x = 1;
@@ -515,14 +602,14 @@ void drawCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, uin
   }
 }
 
-void fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color, uint8_t *buffer)
+void fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color, int *buffer)
 {
   drawFastVLine(x0, y0 - r, 2 * r + 1, color, buffer);
   fillCircleHelper(x0, y0, r, 3, 0, color, buffer);
 }
 
 // Used to do circles and roundrects
-void fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, uint16_t color, uint8_t *buffer)
+void fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int16_t delta, uint16_t color, int *buffer)
 {
 
   int16_t f = 1 - r;
@@ -557,7 +644,7 @@ void fillCircleHelper(int16_t x0, int16_t y0, int16_t r, uint8_t cornername, int
 }
 
 // Bresenham's algorithm - thx wikpedia
-void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color, uint8_t *buffer)
+void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color, int *buffer)
 {
   int16_t steep = abs(y1 - y0) > abs(x1 - x0);
   if (steep)
@@ -608,7 +695,7 @@ void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color, ui
 }
 
 // Draw a rectangle
-void drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, uint8_t *buffer)
+void drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, int *buffer)
 {
   drawFastHLine(x, y, w, color, buffer);
   drawFastHLine(x, y + h - 1, w, color, buffer);
@@ -616,19 +703,19 @@ void drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, uint8_
   drawFastVLine(x + w - 1, y, h, color, buffer);
 }
 
-void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color, uint8_t *buffer)
+void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color, int *buffer)
 {
   // Update in subclasses if desired!
   drawLine(x, y, x, y + h - 1, color, buffer);
 }
 
-void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color, uint8_t *buffer)
+void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color, int *buffer)
 {
   // Update in subclasses if desired!
   drawLine(x, y, x + w - 1, y, color, buffer);
 }
 
-void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, uint8_t *buffer)
+void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, int *buffer)
 {
   // Update in subclasses if desired!
   for (int16_t i = x; i < x + w; i++)
@@ -638,7 +725,7 @@ void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, uint8_
 }
 
 // Draw a rounded rectangle
-void drawRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color, uint8_t *buffer)
+void drawRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color, int *buffer)
 {
   // smarter version
   drawFastHLine(x + r, y, w - 2 * r, color, buffer);         // Top
@@ -653,7 +740,7 @@ void drawRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16
 }
 
 // Fill a rounded rectangle
-void fillRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color, uint8_t *buffer)
+void fillRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color, int *buffer)
 {
   // smarter version
   fillRect(x + r, y, w - 2 * r, h, color, buffer);
@@ -664,7 +751,7 @@ void fillRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16
 }
 
 // Draw a triangle
-void drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color, uint8_t *buffer)
+void drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color, int *buffer)
 {
   drawLine(x0, y0, x1, y1, color, buffer);
   drawLine(x1, y1, x2, y2, color, buffer);
@@ -672,7 +759,7 @@ void drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, in
 }
 
 // Fill a triangle
-void fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color, uint8_t *buffer)
+void fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color, int *buffer)
 {
   int16_t a, b, y, last;
 
@@ -765,7 +852,7 @@ void fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, in
   }
 }
 
-void testLines(uint8_t *buffer)
+void testLines(int *buffer)
 {
   int x1, y1, x2, y2, w = WIDTH, h = HEIGHT;
   uint8_t color = 1;
@@ -852,7 +939,7 @@ void testLines(uint8_t *buffer)
   delay(1000);
 }
 
-void testFastLines(uint8_t *buffer)
+void testFastLines(int *buffer)
 {
 
   int x, y, w = WIDTH, h = HEIGHT;
@@ -873,7 +960,7 @@ void testFastLines(uint8_t *buffer)
   delay(1000);
 }
 
-void testRects(uint8_t *buffer)
+void testRects(int *buffer)
 {
 
   int n, i, i2,
@@ -891,7 +978,7 @@ void testRects(uint8_t *buffer)
   }
 }
 
-void testFilledRects(uint8_t *buffer)
+void testFilledRects(int *buffer)
 {
 
   int n, i, i2,
@@ -913,7 +1000,7 @@ void testFilledRects(uint8_t *buffer)
   }
 }
 
-void testFilledCircles(uint8_t radius, uint8_t *buffer)
+void testFilledCircles(uint8_t radius, int *buffer)
 {
   int x, y, w = WIDTH, h = HEIGHT, r2 = radius * 2;
 
@@ -928,7 +1015,7 @@ void testFilledCircles(uint8_t radius, uint8_t *buffer)
   }
 }
 
-void testCircles(uint8_t radius, uint8_t *buffer)
+void testCircles(uint8_t radius, int *buffer)
 {
   int x, y, w = WIDTH, h = HEIGHT, r2 = radius * 2;
 
@@ -943,7 +1030,7 @@ void testCircles(uint8_t radius, uint8_t *buffer)
   }
 }
 
-void testTriangles(uint8_t *buffer)
+void testTriangles(int *buffer)
 {
   int n, i, cx = WIDTH / 2 - 1,
             cy = HEIGHT / 2 - 1;
@@ -961,7 +1048,7 @@ void testTriangles(uint8_t *buffer)
   }
 }
 
-void testFilledTriangles(uint8_t *buffer)
+void testFilledTriangles(int *buffer)
 {
   int i, cx = WIDTH / 2 - 1,
          cy = HEIGHT / 2 - 1;
@@ -978,7 +1065,7 @@ void testFilledTriangles(uint8_t *buffer)
   }
 }
 
-void testRoundRects(uint8_t *buffer)
+void testRoundRects(int *buffer)
 {
   int w, i, i2,
       cx = WIDTH / 2 - 1,
@@ -994,7 +1081,7 @@ void testRoundRects(uint8_t *buffer)
   }
 }
 
-void testFilledRoundRects(uint8_t *buffer)
+void testFilledRoundRects(int *buffer)
 {
   int i, i2,
       cx = WIDTH / 2 - 1,

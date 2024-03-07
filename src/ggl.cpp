@@ -4,7 +4,9 @@ int WIDTH;
 int HEIGHT;
 int DISPLAY_ROTATE;
 
-void set_display_rotate(int ROTATE)
+int lcd_buf[256 * 160/4];
+
+void GGL::rotate(int ROTATE)
 {
   DISPLAY_ROTATE = ROTATE;
   if ((ROTATE == ROTATE_0) || (ROTATE == ROTATE_180))
@@ -18,8 +20,7 @@ void set_display_rotate(int ROTATE)
     HEIGHT = 160;
   }
 }
-
-void command(int cmd)
+void GGL::command(int cmd)
 {
   digitalWrite(LCD_CS, LOW);
   digitalWrite(LCD_DC, LOW);
@@ -27,8 +28,7 @@ void command(int cmd)
   // SPIWrite_byte(cmd);    //Software SPI
   digitalWrite(LCD_CS, HIGH);
 }
-
-void dat(int dat)
+void GGL::dat(int dat)
 {
   digitalWrite(LCD_CS, LOW);
   digitalWrite(LCD_DC, HIGH);
@@ -36,8 +36,7 @@ void dat(int dat)
   // SPIWrite_byte(dat); //Software SPI
   digitalWrite(LCD_CS, HIGH);
 }
-
-void SPIWrite_byte(int dat)
+void GGL::SPIWrite_byte(int dat)
 {
   digitalWrite(LCD_SCK, LOW);
   for (int i = 0; i < 8; i++)
@@ -54,16 +53,8 @@ void SPIWrite_byte(int dat)
   }
 }
 
-/*
-void SPIWrite(uint8_t *buffer, int bufferLength) {
-    int i;
-    for (i = 0; i < bufferLength; i++) {
-        SPI.transfer(buffer[i]);
-    }
-}
-*/
 
-void er_lcd_begin()
+void GGL::begin()
 {
   uint16_t Contrast = 240;
   pinMode(LCD_BL, OUTPUT);
@@ -132,8 +123,30 @@ void er_lcd_begin()
 
   digitalWrite(LCD_BL, LOW);
 }
+void GGL::display(int *pBuf)
+{
+  int page, i;
 
-void er_lcd_clear(int *buffer)
+  command(0xf0); // Display Mode
+  dat(0x10);     // Monochrome Mode
+
+  command(0x15);
+  dat(0x00);
+  dat(0xff);
+  command(0x75);
+  dat(0x00);
+  dat(0x28);
+  command(0x5c);
+
+  for (page = 0; page < 160 / 8; page++)
+  {
+    for (i = 0; i < 256; i++)
+    {
+      dat(pBuf[i + (page * 256)]);
+    }
+  }
+}
+void GGL::clear(int *buffer)
 {
   int i;
   for (i = 0; i <= WIDTH * (HEIGHT/4); i++)
@@ -141,10 +154,8 @@ void er_lcd_clear(int *buffer)
     buffer[i] = 0;
   }
 }
-
-void er_lcd_pixel(int x, int y, char color, int *buffer)
+void GGL::pixel(int x, int y, char color, int *buffer)
 {
-
   int point_temp;
   if (DISPLAY_ROTATE == ROTATE_0)
   {
@@ -189,115 +200,7 @@ void er_lcd_pixel(int x, int y, char color, int *buffer)
   else
     buffer[x + (y / 8) * 256] &= ~(1 << (y % 8));
 }
-
-void er_lcd_char1616(int x, int y, int chChar, int *buffer)
-{
-  int i, j;
-  int chTemp = 0, y0 = y, chMode = 0;
-
-  for (i = 0; i < 32; i++)
-  {
-    chTemp = pgm_read_byte(&Font1612[chChar - 0x30][i]);
-    for (j = 0; j < 8; j++)
-    {
-      chMode = chTemp & 0x80 ? 1 : 0;
-      er_lcd_pixel(x, y, chMode, buffer);
-      chTemp <<= 1;
-      y++;
-      if ((y - y0) == 16)
-      {
-        y = y0;
-        x++;
-        break;
-      }
-    }
-  }
-}
-
-void er_lcd_char(unsigned char x, unsigned char y, char acsii, char size, char mode, int *buffer)
-{
-  unsigned char i, j, y0 = y;
-  char temp;
-  unsigned char ch = acsii - ' ';
-  for (i = 0; i < size; i++)
-  {
-    if (size == 12)
-    {
-      if (mode)
-        temp = pgm_read_byte(&Font1206[ch][i]);
-      else
-        temp = ~pgm_read_byte(&Font1206[ch][i]);
-    }
-    else
-    {
-      if (mode)
-        temp = pgm_read_byte(&Font1608[ch][i]);
-      else
-        temp = ~pgm_read_byte(&Font1608[ch][i]);
-    }
-    for (j = 0; j < 8; j++)
-    {
-      if (temp & 0x80)
-        er_lcd_pixel(x, y, 1, buffer);
-      else
-        er_lcd_pixel(x, y, 0, buffer);
-      temp <<= 1;
-      y++;
-      if ((y - y0) == size)
-      {
-        y = y0;
-        x++;
-        break;
-      }
-    }
-  }
-}
-
-void er_lcd_string(int x, int y, const char *pString, int Size, int Mode, int *buffer)
-{
-  while (*pString != '\0')
-  {
-    if (x > (WIDTH - Size / 2))
-    {
-      x = 0;
-      y += Size;
-      if (y > (HEIGHT - Size))
-      {
-        y = x = 0;
-      }
-    }
-
-    er_lcd_char(x, y, *pString, Size, Mode, buffer);
-    x += Size / 2;
-    pString++;
-  }
-}
-
-void er_lcd_char3216(int x, int y, int chChar, int *buffer)
-{
-  int i, j;
-  int chTemp = 0, y0 = y, chMode = 0;
-
-  for (i = 0; i < 64; i++)
-  {
-    chTemp = pgm_read_byte(&Font3216[chChar - 0x30][i]);
-    for (j = 0; j < 8; j++)
-    {
-      chMode = chTemp & 0x80 ? 1 : 0;
-      er_lcd_pixel(x, y, chMode, buffer);
-      chTemp <<= 1;
-      y++;
-      if ((y - y0) == 32)
-      {
-        y = y0;
-        x++;
-        break;
-      }
-    }
-  }
-}
-
-void er_lcd_bitmap(int x, int y, const int *pBmp, int chWidth, int chHeight, int *buffer)
+void GGL::bitmap(int x, int y, const int *pBmp, int chWidth, int chHeight, int *buffer)
 {
   int i, j, byteWidth = (chWidth + 7) / 8;
   for (j = 0; j < chHeight; j++)
@@ -306,41 +209,16 @@ void er_lcd_bitmap(int x, int y, const int *pBmp, int chWidth, int chHeight, int
     {
       if (pgm_read_byte(pBmp + j * byteWidth + i / 8) & (128 >> (i & 7)))
       {
-        er_lcd_pixel(x + i, y + j, 1, buffer);
+        GGL::pixel(x + i, y + j, 1, buffer);
       }
       else
-        er_lcd_pixel(x + i, y + j, 0, buffer);
+        GGL::pixel(x + i, y + j, 0, buffer);
     }
   }
 }
-
-void er_lcd_display(int *pBuf)
+void GGL::pixelGray(int x, int y, char color, int *buffer)
 {
-  int page, i;
-
-  command(0xf0); // Display Mode
-  dat(0x10);     // Monochrome Mode
-
-  command(0x15);
-  dat(0x00);
-  dat(0xff);
-  command(0x75);
-  dat(0x00);
-  dat(0x28);
-  command(0x5c);
-
-  for (page = 0; page < 160 / 8; page++)
-  {
-    for (i = 0; i < 256; i++)
-    {
-      dat(pBuf[i + (page * 256)]);
-    }
-  }
-}
-
-void er_lcd_pixel_gray(int x, int y, char color, int *buffer)
-{
-  set_display_rotate(ROTATE_0);
+  GGL::rotate(ROTATE_0);
   if (x > 256 || y > 256 * 2)
     return;
   if (color)
@@ -348,8 +226,7 @@ void er_lcd_pixel_gray(int x, int y, char color, int *buffer)
   else
     buffer[x + (y / 8) * 256] &= ~(1 << (y % 8));
 }
-
-void er_lcd_bitmap_gray(int x, int y, const int *pBmp, int chWidth, int chHeight, int *buffer)
+void GGL::bitmapGray(int x, int y, const int *pBmp, int chWidth, int chHeight, int *buffer)
 {
   int i, j, k;
   int page = chHeight * 2 / 8;
@@ -362,14 +239,13 @@ void er_lcd_bitmap_gray(int x, int y, const int *pBmp, int chWidth, int chHeight
       {
         if (pgm_read_byte(pBmp + j + k * chWidth) & (0x01 << (i & 7)))
         {
-          er_lcd_pixel_gray(x + j, y + i + k * 8, 1, buffer);
+          GGL::pixelGray(x + j, y + i + k * 8, 1, buffer);
         }
       }
     }
   }
 }
-
-void er_lcd_display_gray(int *pBuf)
+void GGL::displayGray(int *pBuf)
 {
   int page, i;
 
@@ -393,64 +269,123 @@ void er_lcd_display_gray(int *pBuf)
   }
 }
 
-void demo_game(int *buffer)
+void GGL::writeChar1616(int x, int y, int chChar, int *buffer)
 {
-  uint16_t cs = 200;
-  int r = 5;          // Radius
-  int i = 3;          // Stepping variables
-  int x = 5, y = 5;   // Starting position
-  int dx = i, dy = i; // Stepping
-  int x1, y1;         // Save the last position
+  int i, j;
+  int chTemp = 0, y0 = y, chMode = 0;
 
-  while (cs--)
+  for (i = 0; i < 32; i++)
   {
-    drawCircle(x1, y1, r, 0, buffer);
-    x1 = x, y1 = y; // Save location
-    if ((x - r) < 0)
-      dx = i;
-    if ((x + r) > WIDTH - 1)
-      dx = -i;
-    if ((y - r) < 0)
-      dy = i;
-    if ((y + r) > HEIGHT - 1)
-      dy = -i;
-    x += dx;
-    y += dy;
-    delay(100);
-    drawCircle(x1, y1, r, 1, buffer); // Disappear before a round
-    er_lcd_pixel(x1, y1, 1, buffer);  // Locus
-    er_lcd_display(buffer);
+    chTemp = pgm_read_byte(&Font1612[chChar - 0x30][i]);
+    for (j = 0; j < 8; j++)
+    {
+      chMode = chTemp & 0x80 ? 1 : 0;
+      GGL::pixel(x, y, chMode, buffer);
+      chTemp <<= 1;
+      y++;
+      if ((y - y0) == 16)
+      {
+        y = y0;
+        x++;
+        break;
+      }
+    }
+  }
+}
+void GGL::writeChar(unsigned char x, unsigned char y, char acsii, char size, char mode, int *buffer)
+{
+  unsigned char i, j, y0 = y;
+  char temp;
+  unsigned char ch = acsii - ' ';
+  for (i = 0; i < size; i++)
+  {
+    if (size == 12)
+    {
+      if (mode)
+        temp = pgm_read_byte(&Font1206[ch][i]);
+      else
+        temp = ~pgm_read_byte(&Font1206[ch][i]);
+    }
+    else
+    {
+      if (mode)
+        temp = pgm_read_byte(&Font1608[ch][i]);
+      else
+        temp = ~pgm_read_byte(&Font1608[ch][i]);
+    }
+    for (j = 0; j < 8; j++)
+    {
+      if (temp & 0x80)
+        GGL::pixel(x, y, 1, buffer);
+      else
+        GGL::pixel(x, y, 0, buffer);
+      temp <<= 1;
+      y++;
+      if ((y - y0) == size)
+      {
+        y = y0;
+        x++;
+        break;
+      }
+    }
+  }
+}
+void GGL::writeString(int x, int y, const char *pString, int Size, int Mode, int *buffer)
+{
+  while (*pString != '\0')
+  {
+    if (x > (WIDTH - Size / 2))
+    {
+      x = 0;
+      y += Size;
+      if (y > (HEIGHT - Size))
+      {
+        y = x = 0;
+      }
+    }
+
+    GGL::writeChar(x, y, *pString, Size, Mode, buffer);
+    x += Size / 2;
+    pString++;
+  }
+}
+void GGL::writeChar3216(int x, int y, int chChar, int *buffer)
+{
+  int i, j;
+  int chTemp = 0, y0 = y, chMode = 0;
+
+  for (i = 0; i < 64; i++)
+  {
+    chTemp = pgm_read_byte(&Font3216[chChar - 0x30][i]);
+    for (j = 0; j < 8; j++)
+    {
+      chMode = chTemp & 0x80 ? 1 : 0;
+      GGL::pixel(x, y, chMode, buffer);
+      chTemp <<= 1;
+      y++;
+      if ((y - y0) == 32)
+      {
+        y = y0;
+        x++;
+        break;
+      }
+    }
   }
 }
 
-void demo_sine(int *buffer)
-{
-  drawFastHLine(0, HEIGHT / 2, WIDTH, 1, buffer);
-  drawFastVLine(WIDTH / 2, 0, HEIGHT, 1, buffer);
-
-  drawSine(HEIGHT / 2, HEIGHT / 4, 5, 1, buffer);
-  er_lcd_display(buffer);
-  delay(1000);
-  drawSine(HEIGHT / 2, HEIGHT / 3, 4, 1, buffer);
-  er_lcd_display(buffer);
-  delay(1000);
-}
-
-void drawSine(uint16_t y, uint16_t a, uint16_t n, uint16_t color, int *buffer)
+void GGL::drawSine(uint16_t y, uint16_t a, uint16_t n, uint16_t color, int *buffer)
 {
   uint16_t x1 = 0, x2;
   uint16_t y1 = HEIGHT / 2, y2;
   for (x2 = 0; x2 < WIDTH; x2++)
   {
     y2 = y + (a * sin(0.0175 * n * x2));
-    drawLine(x1, y1, x2, y2, color, buffer);
+    GGL::drawLine(x1, y1, x2, y2, color, buffer);
     x1 = x2;
     y1 = y2;
   }
 }
-
-// Draw a circle outline
-void drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color, int *buffer)
+void GGL::drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color, int *buffer)
 {
   int16_t f = 1 - r;
   int16_t ddF_x = 1;
@@ -458,10 +393,10 @@ void drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color, int *buffe
   int16_t x = 0;
   int16_t y = r;
 
-  er_lcd_pixel(x0, y0 + r, color, buffer);
-  er_lcd_pixel(x0, y0 - r, color, buffer);
-  er_lcd_pixel(x0 + r, y0, color, buffer);
-  er_lcd_pixel(x0 - r, y0, color, buffer);
+  GGL::pixel(x0, y0 + r, color, buffer);
+  GGL::pixel(x0, y0 - r, color, buffer);
+  GGL::pixel(x0 + r, y0, color, buffer);
+  GGL::pixel(x0 - r, y0, color, buffer);
 
   while (x < y)
   {
@@ -475,18 +410,17 @@ void drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color, int *buffe
     ddF_x += 2;
     f += ddF_x;
 
-    er_lcd_pixel(x0 + x, y0 + y, color, buffer);
-    er_lcd_pixel(x0 - x, y0 + y, color, buffer);
-    er_lcd_pixel(x0 + x, y0 - y, color, buffer);
-    er_lcd_pixel(x0 - x, y0 - y, color, buffer);
-    er_lcd_pixel(x0 + y, y0 + x, color, buffer);
-    er_lcd_pixel(x0 - y, y0 + x, color, buffer);
-    er_lcd_pixel(x0 + y, y0 - x, color, buffer);
-    er_lcd_pixel(x0 - y, y0 - x, color, buffer);
+    GGL::pixel(x0 + x, y0 + y, color, buffer);
+    GGL::pixel(x0 - x, y0 + y, color, buffer);
+    GGL::pixel(x0 + x, y0 - y, color, buffer);
+    GGL::pixel(x0 - x, y0 - y, color, buffer);
+    GGL::pixel(x0 + y, y0 + x, color, buffer);
+    GGL::pixel(x0 - y, y0 + x, color, buffer);
+    GGL::pixel(x0 + y, y0 - x, color, buffer);
+    GGL::pixel(x0 - y, y0 - x, color, buffer);
   }
 }
-
-void drawCircleHelper(int16_t x0, int16_t y0, int16_t r, int cornername, uint16_t color, int *buffer)
+void GGL::drawCircleHelper(int16_t x0, int16_t y0, int16_t r, int cornername, uint16_t color, int *buffer)
 {
   int16_t f = 1 - r;
   int16_t ddF_x = 1;
@@ -507,70 +441,27 @@ void drawCircleHelper(int16_t x0, int16_t y0, int16_t r, int cornername, uint16_
     f += ddF_x;
     if (cornername & 0x4)
     {
-      er_lcd_pixel(x0 + x, y0 + y, color, buffer);
-      er_lcd_pixel(x0 + y, y0 + x, color, buffer);
+      GGL::pixel(x0 + x, y0 + y, color, buffer);
+      GGL::pixel(x0 + y, y0 + x, color, buffer);
     }
     if (cornername & 0x2)
     {
-      er_lcd_pixel(x0 + x, y0 - y, color, buffer);
-      er_lcd_pixel(x0 + y, y0 - x, color, buffer);
+      GGL::pixel(x0 + x, y0 - y, color, buffer);
+      GGL::pixel(x0 + y, y0 - x, color, buffer);
     }
     if (cornername & 0x8)
     {
-      er_lcd_pixel(x0 - y, y0 + x, color, buffer);
-      er_lcd_pixel(x0 - x, y0 + y, color, buffer);
+      GGL::pixel(x0 - y, y0 + x, color, buffer);
+      GGL::pixel(x0 - x, y0 + y, color, buffer);
     }
     if (cornername & 0x1)
     {
-      er_lcd_pixel(x0 - y, y0 - x, color, buffer);
-      er_lcd_pixel(x0 - x, y0 - y, color, buffer);
+      GGL::pixel(x0 - y, y0 - x, color, buffer);
+      GGL::pixel(x0 - x, y0 - y, color, buffer);
     }
   }
 }
-
-void fillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color, int *buffer)
-{
-  drawFastVLine(x0, y0 - r, 2 * r + 1, color, buffer);
-  fillCircleHelper(x0, y0, r, 3, 0, color, buffer);
-}
-
-// Used to do circles and roundrects
-void fillCircleHelper(int16_t x0, int16_t y0, int16_t r, int cornername, int16_t delta, uint16_t color, int *buffer)
-{
-
-  int16_t f = 1 - r;
-  int16_t ddF_x = 1;
-  int16_t ddF_y = -2 * r;
-  int16_t x = 0;
-  int16_t y = r;
-
-  while (x < y)
-  {
-    if (f >= 0)
-    {
-      y--;
-      ddF_y += 2;
-      f += ddF_y;
-    }
-    x++;
-    ddF_x += 2;
-    f += ddF_x;
-
-    if (cornername & 0x1)
-    {
-      drawFastVLine(x0 + x, y0 - y, 2 * y + 1 + delta, color, buffer);
-      drawFastVLine(x0 + y, y0 - x, 2 * x + 1 + delta, color, buffer);
-    }
-    if (cornername & 0x2)
-    {
-      drawFastVLine(x0 - x, y0 - y, 2 * y + 1 + delta, color, buffer);
-      drawFastVLine(x0 - y, y0 - x, 2 * x + 1 + delta, color, buffer);
-    }
-  }
-}
-
-// Bresenham's algorithm - thx wikpedia
-void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color, int *buffer)
+void GGL::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color, int *buffer)
 {
   int16_t steep = abs(y1 - y0) > abs(x1 - x0);
   if (steep)
@@ -605,11 +496,11 @@ void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color, in
   {
     if (steep)
     {
-      er_lcd_pixel(y0, x0, color, buffer);
+      GGL::pixel(y0, x0, color, buffer);
     }
     else
     {
-      er_lcd_pixel(x0, y0, color, buffer);
+      GGL::pixel(x0, y0, color, buffer);
     }
     err -= dy;
     if (err < 0)
@@ -619,73 +510,99 @@ void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color, in
     }
   }
 }
-
-// Draw a rectangle
-void drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, int *buffer)
+void GGL::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, int *buffer)
 {
-  drawFastHLine(x, y, w, color, buffer);
-  drawFastHLine(x, y + h - 1, w, color, buffer);
-  drawFastVLine(x, y, h, color, buffer);
-  drawFastVLine(x + w - 1, y, h, color, buffer);
+  GGL::drawFastHLine(x, y, w, color, buffer);
+  GGL::drawFastHLine(x, y + h - 1, w, color, buffer);
+  GGL::drawFastVLine(x, y, h, color, buffer);
+  GGL::drawFastVLine(x + w - 1, y, h, color, buffer);
 }
-
-void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color, int *buffer)
+void GGL::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color, int *buffer)
 {
   // Update in subclasses if desired!
-  drawLine(x, y, x, y + h - 1, color, buffer);
+  GGL::drawLine(x, y, x, y + h - 1, color, buffer);
 }
-
-void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color, int *buffer)
+void GGL::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color, int *buffer)
 {
   // Update in subclasses if desired!
-  drawLine(x, y, x + w - 1, y, color, buffer);
+  GGL::drawLine(x, y, x + w - 1, y, color, buffer);
+}
+void GGL::drawRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color, int *buffer)
+{
+  // smarter version
+  GGL::drawFastHLine(x + r, y, w - 2 * r, color, buffer);         // Top
+  GGL::drawFastHLine(x + r, y + h - 1, w - 2 * r, color, buffer); // Bottom
+  GGL::drawFastVLine(x, y + r, h - 2 * r, color, buffer);         // Left
+  GGL::drawFastVLine(x + w - 1, y + r, h - 2 * r, color, buffer); // Right
+  // draw four corners
+  GGL::drawCircleHelper(x + r, y + r, r, 1, color, buffer);
+  GGL::drawCircleHelper(x + w - r - 1, y + r, r, 2, color, buffer);
+  GGL::drawCircleHelper(x + w - r - 1, y + h - r - 1, r, 4, color, buffer);
+  GGL::drawCircleHelper(x + r, y + h - r - 1, r, 8, color, buffer);
+}
+void GGL::drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color, int *buffer)
+{
+  GGL::drawLine(x0, y0, x1, y1, color, buffer);
+  GGL::drawLine(x1, y1, x2, y2, color, buffer);
+  GGL::drawLine(x2, y2, x0, y0, color, buffer);
 }
 
-void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, int *buffer)
+void GGL::drawFillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color, int *buffer)
+{
+  GGL::drawFastVLine(x0, y0 - r, 2 * r + 1, color, buffer);
+  GGL::drawFillCircleHelper(x0, y0, r, 3, 0, color, buffer);
+}
+void GGL::drawFillCircleHelper(int16_t x0, int16_t y0, int16_t r, int cornername, int16_t delta, uint16_t color, int *buffer)
+{
+
+  int16_t f = 1 - r;
+  int16_t ddF_x = 1;
+  int16_t ddF_y = -2 * r;
+  int16_t x = 0;
+  int16_t y = r;
+
+  while (x < y)
+  {
+    if (f >= 0)
+    {
+      y--;
+      ddF_y += 2;
+      f += ddF_y;
+    }
+    x++;
+    ddF_x += 2;
+    f += ddF_x;
+
+    if (cornername & 0x1)
+    {
+      GGL::drawFastVLine(x0 + x, y0 - y, 2 * y + 1 + delta, color, buffer);
+      GGL::drawFastVLine(x0 + y, y0 - x, 2 * x + 1 + delta, color, buffer);
+    }
+    if (cornername & 0x2)
+    {
+      GGL::drawFastVLine(x0 - x, y0 - y, 2 * y + 1 + delta, color, buffer);
+      GGL::drawFastVLine(x0 - y, y0 - x, 2 * x + 1 + delta, color, buffer);
+    }
+  }
+}
+void GGL::drawFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, int *buffer)
 {
   // Update in subclasses if desired!
   for (int16_t i = x; i < x + w; i++)
   {
-    drawFastVLine(i, y, h, color, buffer);
+    GGL::drawFastVLine(i, y, h, color, buffer);
   }
 }
-
-// Draw a rounded rectangle
-void drawRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color, int *buffer)
+void GGL::drawFillRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color, int *buffer)
 {
   // smarter version
-  drawFastHLine(x + r, y, w - 2 * r, color, buffer);         // Top
-  drawFastHLine(x + r, y + h - 1, w - 2 * r, color, buffer); // Bottom
-  drawFastVLine(x, y + r, h - 2 * r, color, buffer);         // Left
-  drawFastVLine(x + w - 1, y + r, h - 2 * r, color, buffer); // Right
-  // draw four corners
-  drawCircleHelper(x + r, y + r, r, 1, color, buffer);
-  drawCircleHelper(x + w - r - 1, y + r, r, 2, color, buffer);
-  drawCircleHelper(x + w - r - 1, y + h - r - 1, r, 4, color, buffer);
-  drawCircleHelper(x + r, y + h - r - 1, r, 8, color, buffer);
-}
-
-// Fill a rounded rectangle
-void fillRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color, int *buffer)
-{
-  // smarter version
-  fillRect(x + r, y, w - 2 * r, h, color, buffer);
+  GGL::drawFillRect(x + r, y, w - 2 * r, h, color, buffer);
 
   // draw four corners
-  fillCircleHelper(x + w - r - 1, y + r, r, 1, h - 2 * r - 1, color, buffer);
-  fillCircleHelper(x + r, y + r, r, 2, h - 2 * r - 1, color, buffer);
+  GGL::drawFillCircleHelper(x + w - r - 1, y + r, r, 1, h - 2 * r - 1, color, buffer);
+  GGL::drawFillCircleHelper(x + r, y + r, r, 2, h - 2 * r - 1, color, buffer);
 }
-
-// Draw a triangle
-void drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color, int *buffer)
-{
-  drawLine(x0, y0, x1, y1, color, buffer);
-  drawLine(x1, y1, x2, y2, color, buffer);
-  drawLine(x2, y2, x0, y0, color, buffer);
-}
-
-// Fill a triangle
-void fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color, int *buffer)
+void GGL::drawFillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color, int *buffer)
 {
   int16_t a, b, y, last;
 
@@ -717,7 +634,7 @@ void fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, in
       a = x2;
     else if (x2 > b)
       b = x2;
-    drawFastHLine(a, y0, b - a + 1, color, buffer);
+    GGL::drawFastHLine(a, y0, b - a + 1, color, buffer);
     return;
   }
 
@@ -755,7 +672,7 @@ void fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, in
     */
     if (a > b)
       swapxy(a, b);
-    drawFastHLine(a, y, b - a + 1, color, buffer);
+    GGL::drawFastHLine(a, y, b - a + 1, color, buffer);
   }
 
   // For lower part of triangle, find scanline crossings for segments
@@ -774,8 +691,58 @@ void fillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, in
     */
     if (a > b)
       swapxy(a, b);
-    drawFastHLine(a, y, b - a + 1, color, buffer);
+    GGL::drawFastHLine(a, y, b - a + 1, color, buffer);
   }
+}
+
+
+
+
+
+
+
+
+/*
+void demo_game(int *buffer)
+{
+  uint16_t cs = 200;
+  int r = 5;          // Radius
+  int i = 3;          // Stepping variables
+  int x = 5, y = 5;   // Starting position
+  int dx = i, dy = i; // Stepping
+  int x1, y1;         // Save the last position
+
+  while (cs--)
+  {
+    drawCircle(x1, y1, r, 0, buffer);
+    x1 = x, y1 = y; // Save location
+    if ((x - r) < 0)
+      dx = i;
+    if ((x + r) > WIDTH - 1)
+      dx = -i;
+    if ((y - r) < 0)
+      dy = i;
+    if ((y + r) > HEIGHT - 1)
+      dy = -i;
+    x += dx;
+    y += dy;
+    delay(100);
+    drawCircle(x1, y1, r, 1, buffer); // Disappear before a round
+    er_lcd_pixel(x1, y1, 1, buffer);  // Locus
+    er_lcd_display(buffer);
+  }
+}
+void demo_sine(int *buffer)
+{
+  drawFastHLine(0, HEIGHT / 2, WIDTH, 1, buffer);
+  drawFastVLine(WIDTH / 2, 0, HEIGHT, 1, buffer);
+
+  drawSine(HEIGHT / 2, HEIGHT / 4, 5, 1, buffer);
+  er_lcd_display(buffer);
+  delay(1000);
+  drawSine(HEIGHT / 2, HEIGHT / 3, 4, 1, buffer);
+  er_lcd_display(buffer);
+  delay(1000);
 }
 
 void testLines(int *buffer)
@@ -1022,3 +989,4 @@ void testFilledRoundRects(int *buffer)
     er_lcd_clear(buffer);
   }
 }
+*/

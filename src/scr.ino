@@ -2,23 +2,14 @@
 #include <WiFi.h>
 
 
-int lcd_buf[256 * 160/4];
+//int lcd_buf[256 * 160/4];
 
-
-const char* ntpServer = "pool.ntp.org";    //"ntp1.aliyun.com";   
-const long  gmtOffset_sec = 28800;
-const int   daylightOffset_sec = 0;
-
-const char *ssid = "EASTRISING-2"; //"your ssid";
-const char *password = "er33503873";   //"your password";
-
-struct tm timeinfo;
 
 void setup() {
 
-  Serial.begin(115200);
-  er_lcd_begin();
-  Serial.print("LCD Example\n");
+  //Serial.begin(115200);
+  //er_lcd_begin();
+  //Serial.print("LCD Example\n");
  
 }
 
@@ -46,7 +37,7 @@ void loop() {
   er_lcd_display(lcd_buf);
   delay(3000);*/
  
-  er_lcd_clear(lcd_buf);
+  /*er_lcd_clear(lcd_buf);
   er_lcd_bitmap_gray(0, 0, PIC3, 192, 96, lcd_buf);
   er_lcd_display_gray(lcd_buf);  
   delay(3000);
@@ -68,7 +59,7 @@ void loop() {
   demo_sine(lcd_buf);
    
   er_lcd_clear(lcd_buf);
-  testLines(lcd_buf);
+  testLines(lcd_buf);*/
  
   /*er_lcd_clear(lcd_buf);
   testFastLines(lcd_buf);

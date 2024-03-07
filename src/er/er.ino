@@ -24,39 +24,14 @@ void setup() {
 
 void loop() {
 
-  set_display_rotate(ROTATE_0);
+  /*set_display_rotate(ROTATE_0);
   er_lcd_clear(lcd_buf);
   er_lcd_string(0, 0, "Hollow!", 12, 1, lcd_buf); 
   er_lcd_string(0, HEIGHT/2,  "buydisplay.com", 12, 1, lcd_buf);   
   er_lcd_string(0, HEIGHT-12, "EastRising", 12, 1, lcd_buf);     
   er_lcd_display(lcd_buf);
   delay(1000); 
-
-
-  set_display_rotate(ROTATE_90);
-  er_lcd_clear(lcd_buf);
-  er_lcd_string(0, 0, "Hollow!", 12, 1, lcd_buf);  
-  er_lcd_string(0, HEIGHT/2,  "buydisplay.com", 12, 1, lcd_buf);  
-  er_lcd_string(0, HEIGHT-12, "EastRising", 12, 1, lcd_buf);    
-  er_lcd_display(lcd_buf);
-  delay(1000); 
-
-
-  set_display_rotate(ROTATE_180);
-  er_lcd_clear(lcd_buf);
-  er_lcd_string(0, 0, "Hollow!", 12, 1, lcd_buf);
-  er_lcd_string(0, HEIGHT/2,  "buydisplay.com", 12, 1, lcd_buf);   
-  er_lcd_string(0, HEIGHT-12, "EastRising", 12, 1, lcd_buf);     
-  er_lcd_display(lcd_buf);
-  delay(1000); 
-  
-  set_display_rotate(ROTATE_270);
-  er_lcd_clear(lcd_buf);
-  er_lcd_string(0, 0, "Hollow!", 12, 1, lcd_buf);  
-  er_lcd_string(0, HEIGHT/2,  "buydisplay.com", 12, 1, lcd_buf); 
-  er_lcd_string(0, HEIGHT-12, "EastRising", 12, 1, lcd_buf);    
-  er_lcd_display(lcd_buf);
-  delay(1000); 
+ 
   
  
 
@@ -69,7 +44,7 @@ void loop() {
   er_lcd_clear(lcd_buf);
   er_lcd_bitmap(0, 0, PIC2, 192, 96, lcd_buf);
   er_lcd_display(lcd_buf);
-  delay(3000);
+  delay(3000);*/
  
   er_lcd_clear(lcd_buf);
   er_lcd_bitmap_gray(0, 0, PIC3, 192, 96, lcd_buf);
@@ -77,16 +52,15 @@ void loop() {
   delay(3000);
 
   er_lcd_clear(lcd_buf);
-  er_lcd_bitmap_gray(0, 0, gray_pix, 192, 96, lcd_buf);
+  er_lcd_bitmap_gray(0, 0, agent2, 48, 48, lcd_buf);
   er_lcd_display_gray(lcd_buf);  
-  delay(3000);
-  
+  delay(10000);
+
   er_lcd_clear(lcd_buf);
-  er_lcd_bitmap(0, 0, client_bits, 32, 32, lcd_buf);
-  er_lcd_display(lcd_buf);
-  delay(3000);
-
-
+  er_lcd_bitmap_gray(0, 0, agent1, 48, 48, lcd_buf);
+  er_lcd_display_gray(lcd_buf);  
+  delay(10000);
+  
   set_display_rotate(ROTATE_0);
  
   er_lcd_clear(lcd_buf);

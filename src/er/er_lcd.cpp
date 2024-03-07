@@ -105,9 +105,7 @@ void er_lcd_begin()
   command(0x15);
   dat(0x00);
   dat(0xFF); // xe 256
-  
-  command(0xBC); // Data Scan Direction
-  dat(0x02);
+
   dat(0xA6);
 
   command(0x30); // Extension Command 1
@@ -126,7 +124,8 @@ void er_lcd_begin()
   dat(0x00);
   dat(0x9f); // duty 160
   dat(0x00);
-  command(0xBC); // ata Scan Direction
+
+  command(0xBC); // Data Scan Direction
   dat(0x00);     // MY=0
 
   command(0xaf); // Display On
@@ -352,7 +351,7 @@ void er_lcd_pixel_gray(int x, int y, char color, int *buffer)
 
 void er_lcd_bitmap_gray(int x, int y, const int *pBmp, int chWidth, int chHeight, int *buffer)
 {
-  uint16_t i, j, k;
+  int i, j, k;
   int page = chHeight * 2 / 8;
 
   for (k = 0; k < page; k++)
@@ -385,11 +384,10 @@ void er_lcd_display_gray(int *pBuf)
   dat(0x28);
   command(0x5c);
 
-  for (page = 0; page < 160 / 4; page++)
+  for (page = 0; page < 160/4; page++)
   {
     for (i = 0; i < 256; i++)
     {
-
       dat(pBuf[i + (page * 256)]);
     }
   }

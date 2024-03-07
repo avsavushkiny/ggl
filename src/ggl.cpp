@@ -1,26 +1,26 @@
-#include "er_lcd.h"
+#include "ggl.h"
 
-int WIDTH;
-int HEIGHT;
-int DISPLAY_ROTATE;
+int _WIDTH;
+int _HEIGHT;
+int _DISPLAY_ROTATE;
 
-int lcd_buf[256 * 160/4];
+int _LCD_BUFFER[256 * 160/4]; //10240
 
 void GGL::rotate(int ROTATE)
 {
-  DISPLAY_ROTATE = ROTATE;
+  _DISPLAY_ROTATE = ROTATE;
   if ((ROTATE == ROTATE_0) || (ROTATE == ROTATE_180))
   {
-    WIDTH = 256;
-    HEIGHT = 160;
+    _WIDTH = 256;
+    _HEIGHT = 160;
   }
   if ((ROTATE == ROTATE_90) || (ROTATE == ROTATE_270))
   {
-    WIDTH = 256;
-    HEIGHT = 160;
+    _WIDTH = 256;
+    _HEIGHT = 160;
   }
 }
-void GGL::command(int cmd)
+void GGL::transferCommand(int cmd)
 {
   digitalWrite(LCD_CS, LOW);
   digitalWrite(LCD_DC, LOW);
@@ -28,7 +28,7 @@ void GGL::command(int cmd)
   // SPIWrite_byte(cmd);    //Software SPI
   digitalWrite(LCD_CS, HIGH);
 }
-void GGL::dat(int dat)
+void GGL::transferData(int dat)
 {
   digitalWrite(LCD_CS, LOW);
   digitalWrite(LCD_DC, HIGH);
@@ -53,7 +53,6 @@ void GGL::SPIWrite_byte(int dat)
   }
 }
 
-
 void GGL::begin()
 {
   uint16_t Contrast = 240;
@@ -77,96 +76,96 @@ void GGL::begin()
   digitalWrite(LCD_RST, HIGH);
   delay(10);
 
-  command(0x30); // Extension Command 1
-  command(0x94); // Sleep Out
+  transferCommand(0x30); // Extension Command 1
+  transferCommand(0x94); // Sleep Out
   delay(50);
 
-  command(0x31); // Extension Command 2
-  command(0x32); // Analog Circuit Set
-  dat(0x00);
-  dat(0x01);
-  dat(0x03);
-  command(0x51); // Booster Level x10
-  dat(0xFA);     // 8X
+  transferCommand(0x31); // Extension Command 2
+  transferCommand(0x32); // Analog Circuit Set
+  transferData(0x00);
+  transferData(0x01);
+  transferData(0x03);
+  transferCommand(0x51); // Booster Level x10
+  transferData(0xFA);    // 8X
 
-  command(0x30);
-  command(0x75);
-  dat(0x00);
-  dat(0x28);
-  command(0x15);
-  dat(0x00);
-  dat(0xFF); // xe 256
+  transferCommand(0x30);
+  transferCommand(0x75);
+  transferData(0x00);
+  transferData(0x28);
+  transferCommand(0x15);
+  transferData(0x00);
+  transferData(0xFF);    // xe 256
 
-  dat(0xA6);
+  transferData(0xA6);
 
-  command(0x30); // Extension Command 1
-  command(0x20); // Power Control
-  dat(0x0b);     // VB ON ; VR,VF ON
+  transferCommand(0x30); // Extension Command 1
+  transferCommand(0x20); // Power Control
+  transferData(0x0b);    // VB ON ; VR,VF ON
 
-  command(0x81); // Vop Control
-  dat(Contrast & 0x3F);
-  dat((Contrast >> 6) & 0x07);
+  transferCommand(0x81); // Vop Control
+  transferData(Contrast & 0x3F);
+  transferData((Contrast >> 6) & 0x07);
 
-  command(0x0C); // Data Format Select     DO=1; LSB on top
-  command(0xf0); // Display Mode
-  dat(0x10);     // Monochrome Mode
+  transferCommand(0x0C); // Data Format Select     DO=1; LSB on top
+  transferCommand(0xf0); // Display Mode
+  transferData(0x10);    // Monochrome Mode
 
-  command(0xCA); // Display Control
-  dat(0x00);
-  dat(0x9f); // duty 160
-  dat(0x00);
+  transferCommand(0xCA); // Display Control
+  transferData(0x00);
+  transferData(0x9f);    // duty 160
+  transferData(0x00);
 
-  command(0xBC); // Data Scan Direction
-  dat(0x00);     // MY=0
+  transferCommand(0xBC); // Data Scan Direction
+  transferData(0x00);    // MY=0
 
-  command(0xaf); // Display On
+  transferCommand(0xaf); // Display On
 
   digitalWrite(LCD_BL, LOW);
 }
-void GGL::display(int *pBuf)
+void GGL::display()
 {
   int page, i;
 
-  command(0xf0); // Display Mode
-  dat(0x10);     // Monochrome Mode
+  transferCommand(0xf0); // Display Mode
+  transferData(0x10);     // Monochrome Mode
 
-  command(0x15);
-  dat(0x00);
-  dat(0xff);
-  command(0x75);
-  dat(0x00);
-  dat(0x28);
-  command(0x5c);
+  transferCommand(0x15);
+  transferData(0x00);
+  transferData(0xff);
+  transferCommand(0x75);
+  transferData(0x00);
+  transferData(0x28);
+  transferCommand(0x5c);
 
   for (page = 0; page < 160 / 8; page++)
   {
     for (i = 0; i < 256; i++)
     {
-      dat(pBuf[i + (page * 256)]);
+      transferData(_LCD_BUFFER[i + (page * 256)]);
     }
   }
 }
-void GGL::clear(int *buffer)
+void GGL::clear()
 {
   int i;
-  for (i = 0; i <= WIDTH * (HEIGHT/4); i++)
+  for (i = 0; i <= _WIDTH * (_HEIGHT/4); i++)
   {
-    buffer[i] = 0;
+    _LCD_BUFFER[i] = 0;
   }
 }
-void GGL::pixel(int x, int y, char color, int *buffer)
+void GGL::pixel(int x, int y, char color)
 {
   int point_temp;
-  if (DISPLAY_ROTATE == ROTATE_0)
+  if (_DISPLAY_ROTATE == ROTATE_0)
   {
-    if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT)
+    if (x < 0 || x >= _WIDTH || y < 0 || y >= _HEIGHT)
     {
       return;
     }
   }
-  else if (DISPLAY_ROTATE == ROTATE_90)
+  else if (_DISPLAY_ROTATE == ROTATE_90)
   {
-    if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT)
+    if (x < 0 || x >= _WIDTH || y < 0 || y >= _HEIGHT)
     {
       return;
     }
@@ -174,18 +173,18 @@ void GGL::pixel(int x, int y, char color, int *buffer)
     x = 256 - y - 1;
     y = point_temp;
   }
-  else if (DISPLAY_ROTATE == ROTATE_180)
+  else if (_DISPLAY_ROTATE == ROTATE_180)
   {
-    if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT)
+    if (x < 0 || x >= _WIDTH || y < 0 || y >= _HEIGHT)
     {
       return;
     }
     x = 256 - x - 1;
     y = 160 - y - 1;
   }
-  else if (DISPLAY_ROTATE == ROTATE_270)
+  else if (_DISPLAY_ROTATE == ROTATE_270)
   {
-    if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT)
+    if (x < 0 || x >= _WIDTH || y < 0 || y >= _HEIGHT)
     {
       return;
     }
@@ -196,11 +195,11 @@ void GGL::pixel(int x, int y, char color, int *buffer)
 
   // if(x > WIDTH || y > HEIGHT)return ;
   if (color)
-    buffer[x + (y / 8) * 256] |= 1 << (y % 8);
+    _LCD_BUFFER[x + (y / 8) * 256] |= 1 << (y % 8);
   else
-    buffer[x + (y / 8) * 256] &= ~(1 << (y % 8));
+    _LCD_BUFFER[x + (y / 8) * 256] &= ~(1 << (y % 8));
 }
-void GGL::bitmap(int x, int y, const int *pBmp, int chWidth, int chHeight, int *buffer)
+void GGL::bitmap(int x, int y, const int *pBmp, int chWidth, int chHeight)
 {
   int i, j, byteWidth = (chWidth + 7) / 8;
   for (j = 0; j < chHeight; j++)
@@ -209,24 +208,24 @@ void GGL::bitmap(int x, int y, const int *pBmp, int chWidth, int chHeight, int *
     {
       if (pgm_read_byte(pBmp + j * byteWidth + i / 8) & (128 >> (i & 7)))
       {
-        GGL::pixel(x + i, y + j, 1, buffer);
+        GGL::pixel(x + i, y + j, 1);
       }
       else
-        GGL::pixel(x + i, y + j, 0, buffer);
+        GGL::pixel(x + i, y + j, 0);
     }
   }
 }
-void GGL::pixelGray(int x, int y, char color, int *buffer)
+void GGL::pixelGray(int x, int y, char color)
 {
   GGL::rotate(ROTATE_0);
   if (x > 256 || y > 256 * 2)
     return;
   if (color)
-    buffer[x + (y / 8) * 256] |= 1 << (y % 8);
+    _LCD_BUFFER[x + (y / 8) * 256] |= 1 << (y % 8);
   else
-    buffer[x + (y / 8) * 256] &= ~(1 << (y % 8));
+    _LCD_BUFFER[x + (y / 8) * 256] &= ~(1 << (y % 8));
 }
-void GGL::bitmapGray(int x, int y, const int *pBmp, int chWidth, int chHeight, int *buffer)
+void GGL::bitmapGray(int x, int y, const int *pBmp, int chWidth, int chHeight)
 {
   int i, j, k;
   int page = chHeight * 2 / 8;
@@ -239,37 +238,37 @@ void GGL::bitmapGray(int x, int y, const int *pBmp, int chWidth, int chHeight, i
       {
         if (pgm_read_byte(pBmp + j + k * chWidth) & (0x01 << (i & 7)))
         {
-          GGL::pixelGray(x + j, y + i + k * 8, 1, buffer);
+          GGL::pixelGray(x + j, y + i + k * 8, 1);
         }
       }
     }
   }
 }
-void GGL::displayGray(int *pBuf)
+void GGL::displayGray()
 {
   int page, i;
 
-  command(0xf0); // Display Mode
-  dat(0x11);     // 4Gray  Mode
+  transferCommand(0xf0); // Display Mode
+  transferData(0x11);     // 4Gray  Mode
 
-  command(0x15);
-  dat(0x00);
-  dat(0xff);
-  command(0x75);
-  dat(0x00);
-  dat(0x28);
-  command(0x5c);
+  transferCommand(0x15);
+  transferData(0x00);
+  transferData(0xff);
+  transferCommand(0x75);
+  transferData(0x00);
+  transferData(0x28);
+  transferCommand(0x5c);
 
   for (page = 0; page < 160/4; page++)
   {
     for (i = 0; i < 256; i++)
     {
-      dat(pBuf[i + (page * 256)]);
+      transferData(_LCD_BUFFER[i + (page * 256)]);
     }
   }
 }
 
-void GGL::writeChar1616(int x, int y, int chChar, int *buffer)
+void GGL::writeChar1616(int x, int y, int chChar)
 {
   int i, j;
   int chTemp = 0, y0 = y, chMode = 0;
@@ -280,7 +279,7 @@ void GGL::writeChar1616(int x, int y, int chChar, int *buffer)
     for (j = 0; j < 8; j++)
     {
       chMode = chTemp & 0x80 ? 1 : 0;
-      GGL::pixel(x, y, chMode, buffer);
+      GGL::pixel(x, y, chMode);
       chTemp <<= 1;
       y++;
       if ((y - y0) == 16)
@@ -292,7 +291,7 @@ void GGL::writeChar1616(int x, int y, int chChar, int *buffer)
     }
   }
 }
-void GGL::writeChar(unsigned char x, unsigned char y, char acsii, char size, char mode, int *buffer)
+void GGL::writeChar(unsigned char x, unsigned char y, char acsii, char size, char mode)
 {
   unsigned char i, j, y0 = y;
   char temp;
@@ -316,9 +315,9 @@ void GGL::writeChar(unsigned char x, unsigned char y, char acsii, char size, cha
     for (j = 0; j < 8; j++)
     {
       if (temp & 0x80)
-        GGL::pixel(x, y, 1, buffer);
+        GGL::pixel(x, y, 1);
       else
-        GGL::pixel(x, y, 0, buffer);
+        GGL::pixel(x, y, 0);
       temp <<= 1;
       y++;
       if ((y - y0) == size)
@@ -330,26 +329,26 @@ void GGL::writeChar(unsigned char x, unsigned char y, char acsii, char size, cha
     }
   }
 }
-void GGL::writeString(int x, int y, const char *pString, int Size, int Mode, int *buffer)
+void GGL::writeString(int x, int y, const char *pString, int Size, int Mode)
 {
   while (*pString != '\0')
   {
-    if (x > (WIDTH - Size / 2))
+    if (x > (_WIDTH - Size / 2))
     {
       x = 0;
       y += Size;
-      if (y > (HEIGHT - Size))
+      if (y > (_HEIGHT - Size))
       {
         y = x = 0;
       }
     }
 
-    GGL::writeChar(x, y, *pString, Size, Mode, buffer);
+    GGL::writeChar(x, y, *pString, Size, Mode);
     x += Size / 2;
     pString++;
   }
 }
-void GGL::writeChar3216(int x, int y, int chChar, int *buffer)
+void GGL::writeChar3216(int x, int y, int chChar)
 {
   int i, j;
   int chTemp = 0, y0 = y, chMode = 0;
@@ -360,7 +359,7 @@ void GGL::writeChar3216(int x, int y, int chChar, int *buffer)
     for (j = 0; j < 8; j++)
     {
       chMode = chTemp & 0x80 ? 1 : 0;
-      GGL::pixel(x, y, chMode, buffer);
+      GGL::pixel(x, y, chMode);
       chTemp <<= 1;
       y++;
       if ((y - y0) == 32)
@@ -373,19 +372,19 @@ void GGL::writeChar3216(int x, int y, int chChar, int *buffer)
   }
 }
 
-void GGL::drawSine(uint16_t y, uint16_t a, uint16_t n, uint16_t color, int *buffer)
+void GGL::drawSine(uint16_t y, uint16_t a, uint16_t n, uint16_t color)
 {
   uint16_t x1 = 0, x2;
-  uint16_t y1 = HEIGHT / 2, y2;
-  for (x2 = 0; x2 < WIDTH; x2++)
+  uint16_t y1 = _HEIGHT / 2, y2;
+  for (x2 = 0; x2 < _WIDTH; x2++)
   {
     y2 = y + (a * sin(0.0175 * n * x2));
-    GGL::drawLine(x1, y1, x2, y2, color, buffer);
+    GGL::drawLine(x1, y1, x2, y2, color);
     x1 = x2;
     y1 = y2;
   }
 }
-void GGL::drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color, int *buffer)
+void GGL::drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color)
 {
   int16_t f = 1 - r;
   int16_t ddF_x = 1;
@@ -393,10 +392,10 @@ void GGL::drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color, int *
   int16_t x = 0;
   int16_t y = r;
 
-  GGL::pixel(x0, y0 + r, color, buffer);
-  GGL::pixel(x0, y0 - r, color, buffer);
-  GGL::pixel(x0 + r, y0, color, buffer);
-  GGL::pixel(x0 - r, y0, color, buffer);
+  GGL::pixel(x0, y0 + r, color);
+  GGL::pixel(x0, y0 - r, color);
+  GGL::pixel(x0 + r, y0, color);
+  GGL::pixel(x0 - r, y0, color);
 
   while (x < y)
   {
@@ -410,17 +409,17 @@ void GGL::drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color, int *
     ddF_x += 2;
     f += ddF_x;
 
-    GGL::pixel(x0 + x, y0 + y, color, buffer);
-    GGL::pixel(x0 - x, y0 + y, color, buffer);
-    GGL::pixel(x0 + x, y0 - y, color, buffer);
-    GGL::pixel(x0 - x, y0 - y, color, buffer);
-    GGL::pixel(x0 + y, y0 + x, color, buffer);
-    GGL::pixel(x0 - y, y0 + x, color, buffer);
-    GGL::pixel(x0 + y, y0 - x, color, buffer);
-    GGL::pixel(x0 - y, y0 - x, color, buffer);
+    GGL::pixel(x0 + x, y0 + y, color);
+    GGL::pixel(x0 - x, y0 + y, color);
+    GGL::pixel(x0 + x, y0 - y, color);
+    GGL::pixel(x0 - x, y0 - y, color);
+    GGL::pixel(x0 + y, y0 + x, color);
+    GGL::pixel(x0 - y, y0 + x, color);
+    GGL::pixel(x0 + y, y0 - x, color);
+    GGL::pixel(x0 - y, y0 - x, color);
   }
 }
-void GGL::drawCircleHelper(int16_t x0, int16_t y0, int16_t r, int cornername, uint16_t color, int *buffer)
+void GGL::drawCircleHelper(int16_t x0, int16_t y0, int16_t r, int cornername, uint16_t color)
 {
   int16_t f = 1 - r;
   int16_t ddF_x = 1;
@@ -441,27 +440,27 @@ void GGL::drawCircleHelper(int16_t x0, int16_t y0, int16_t r, int cornername, ui
     f += ddF_x;
     if (cornername & 0x4)
     {
-      GGL::pixel(x0 + x, y0 + y, color, buffer);
-      GGL::pixel(x0 + y, y0 + x, color, buffer);
+      GGL::pixel(x0 + x, y0 + y, color);
+      GGL::pixel(x0 + y, y0 + x, color);
     }
     if (cornername & 0x2)
     {
-      GGL::pixel(x0 + x, y0 - y, color, buffer);
-      GGL::pixel(x0 + y, y0 - x, color, buffer);
+      GGL::pixel(x0 + x, y0 - y, color);
+      GGL::pixel(x0 + y, y0 - x, color);
     }
     if (cornername & 0x8)
     {
-      GGL::pixel(x0 - y, y0 + x, color, buffer);
-      GGL::pixel(x0 - x, y0 + y, color, buffer);
+      GGL::pixel(x0 - y, y0 + x, color);
+      GGL::pixel(x0 - x, y0 + y, color);
     }
     if (cornername & 0x1)
     {
-      GGL::pixel(x0 - y, y0 - x, color, buffer);
-      GGL::pixel(x0 - x, y0 - y, color, buffer);
+      GGL::pixel(x0 - y, y0 - x, color);
+      GGL::pixel(x0 - x, y0 - y, color);
     }
   }
 }
-void GGL::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color, int *buffer)
+void GGL::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color)
 {
   int16_t steep = abs(y1 - y0) > abs(x1 - x0);
   if (steep)
@@ -496,11 +495,11 @@ void GGL::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t colo
   {
     if (steep)
     {
-      GGL::pixel(y0, x0, color, buffer);
+      GGL::pixel(y0, x0, color);
     }
     else
     {
-      GGL::pixel(x0, y0, color, buffer);
+      GGL::pixel(x0, y0, color);
     }
     err -= dy;
     if (err < 0)
@@ -510,49 +509,49 @@ void GGL::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t colo
     }
   }
 }
-void GGL::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, int *buffer)
+void GGL::drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 {
-  GGL::drawFastHLine(x, y, w, color, buffer);
-  GGL::drawFastHLine(x, y + h - 1, w, color, buffer);
-  GGL::drawFastVLine(x, y, h, color, buffer);
-  GGL::drawFastVLine(x + w - 1, y, h, color, buffer);
+  GGL::drawFastHLine(x, y, w, color);
+  GGL::drawFastHLine(x, y + h - 1, w, color);
+  GGL::drawFastVLine(x, y, h, color);
+  GGL::drawFastVLine(x + w - 1, y, h, color);
 }
-void GGL::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color, int *buffer)
-{
-  // Update in subclasses if desired!
-  GGL::drawLine(x, y, x, y + h - 1, color, buffer);
-}
-void GGL::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color, int *buffer)
+void GGL::drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color)
 {
   // Update in subclasses if desired!
-  GGL::drawLine(x, y, x + w - 1, y, color, buffer);
+  GGL::drawLine(x, y, x, y + h - 1, color);
 }
-void GGL::drawRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color, int *buffer)
+void GGL::drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
+{
+  // Update in subclasses if desired!
+  GGL::drawLine(x, y, x + w - 1, y, color);
+}
+void GGL::drawRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color)
 {
   // smarter version
-  GGL::drawFastHLine(x + r, y, w - 2 * r, color, buffer);         // Top
-  GGL::drawFastHLine(x + r, y + h - 1, w - 2 * r, color, buffer); // Bottom
-  GGL::drawFastVLine(x, y + r, h - 2 * r, color, buffer);         // Left
-  GGL::drawFastVLine(x + w - 1, y + r, h - 2 * r, color, buffer); // Right
+  GGL::drawFastHLine(x + r, y, w - 2 * r, color);         // Top
+  GGL::drawFastHLine(x + r, y + h - 1, w - 2 * r, color); // Bottom
+  GGL::drawFastVLine(x, y + r, h - 2 * r, color);         // Left
+  GGL::drawFastVLine(x + w - 1, y + r, h - 2 * r, color); // Right
   // draw four corners
-  GGL::drawCircleHelper(x + r, y + r, r, 1, color, buffer);
-  GGL::drawCircleHelper(x + w - r - 1, y + r, r, 2, color, buffer);
-  GGL::drawCircleHelper(x + w - r - 1, y + h - r - 1, r, 4, color, buffer);
-  GGL::drawCircleHelper(x + r, y + h - r - 1, r, 8, color, buffer);
+  GGL::drawCircleHelper(x + r, y + r, r, 1, color);
+  GGL::drawCircleHelper(x + w - r - 1, y + r, r, 2, color);
+  GGL::drawCircleHelper(x + w - r - 1, y + h - r - 1, r, 4, color);
+  GGL::drawCircleHelper(x + r, y + h - r - 1, r, 8, color);
 }
-void GGL::drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color, int *buffer)
+void GGL::drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color)
 {
-  GGL::drawLine(x0, y0, x1, y1, color, buffer);
-  GGL::drawLine(x1, y1, x2, y2, color, buffer);
-  GGL::drawLine(x2, y2, x0, y0, color, buffer);
+  GGL::drawLine(x0, y0, x1, y1, color);
+  GGL::drawLine(x1, y1, x2, y2, color);
+  GGL::drawLine(x2, y2, x0, y0, color);
 }
 
-void GGL::drawFillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color, int *buffer)
+void GGL::drawFillCircle(int16_t x0, int16_t y0, int16_t r, uint16_t color)
 {
-  GGL::drawFastVLine(x0, y0 - r, 2 * r + 1, color, buffer);
-  GGL::drawFillCircleHelper(x0, y0, r, 3, 0, color, buffer);
+  GGL::drawFastVLine(x0, y0 - r, 2 * r + 1, color);
+  GGL::drawFillCircleHelper(x0, y0, r, 3, 0, color);
 }
-void GGL::drawFillCircleHelper(int16_t x0, int16_t y0, int16_t r, int cornername, int16_t delta, uint16_t color, int *buffer)
+void GGL::drawFillCircleHelper(int16_t x0, int16_t y0, int16_t r, int cornername, int16_t delta, uint16_t color)
 {
 
   int16_t f = 1 - r;
@@ -575,34 +574,34 @@ void GGL::drawFillCircleHelper(int16_t x0, int16_t y0, int16_t r, int cornername
 
     if (cornername & 0x1)
     {
-      GGL::drawFastVLine(x0 + x, y0 - y, 2 * y + 1 + delta, color, buffer);
-      GGL::drawFastVLine(x0 + y, y0 - x, 2 * x + 1 + delta, color, buffer);
+      GGL::drawFastVLine(x0 + x, y0 - y, 2 * y + 1 + delta, color);
+      GGL::drawFastVLine(x0 + y, y0 - x, 2 * x + 1 + delta, color);
     }
     if (cornername & 0x2)
     {
-      GGL::drawFastVLine(x0 - x, y0 - y, 2 * y + 1 + delta, color, buffer);
-      GGL::drawFastVLine(x0 - y, y0 - x, 2 * x + 1 + delta, color, buffer);
+      GGL::drawFastVLine(x0 - x, y0 - y, 2 * y + 1 + delta, color);
+      GGL::drawFastVLine(x0 - y, y0 - x, 2 * x + 1 + delta, color);
     }
   }
 }
-void GGL::drawFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color, int *buffer)
+void GGL::drawFillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
 {
   // Update in subclasses if desired!
   for (int16_t i = x; i < x + w; i++)
   {
-    GGL::drawFastVLine(i, y, h, color, buffer);
+    GGL::drawFastVLine(i, y, h, color);
   }
 }
-void GGL::drawFillRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color, int *buffer)
+void GGL::drawFillRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color)
 {
   // smarter version
-  GGL::drawFillRect(x + r, y, w - 2 * r, h, color, buffer);
+  GGL::drawFillRect(x + r, y, w - 2 * r, h, color);
 
   // draw four corners
-  GGL::drawFillCircleHelper(x + w - r - 1, y + r, r, 1, h - 2 * r - 1, color, buffer);
-  GGL::drawFillCircleHelper(x + r, y + r, r, 2, h - 2 * r - 1, color, buffer);
+  GGL::drawFillCircleHelper(x + w - r - 1, y + r, r, 1, h - 2 * r - 1, color);
+  GGL::drawFillCircleHelper(x + r, y + r, r, 2, h - 2 * r - 1, color);
 }
-void GGL::drawFillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color, int *buffer)
+void GGL::drawFillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color)
 {
   int16_t a, b, y, last;
 
@@ -634,7 +633,7 @@ void GGL::drawFillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16
       a = x2;
     else if (x2 > b)
       b = x2;
-    GGL::drawFastHLine(a, y0, b - a + 1, color, buffer);
+    GGL::drawFastHLine(a, y0, b - a + 1, color);
     return;
   }
 
@@ -672,7 +671,7 @@ void GGL::drawFillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16
     */
     if (a > b)
       swapxy(a, b);
-    GGL::drawFastHLine(a, y, b - a + 1, color, buffer);
+    GGL::drawFastHLine(a, y, b - a + 1, color);
   }
 
   // For lower part of triangle, find scanline crossings for segments
@@ -691,7 +690,7 @@ void GGL::drawFillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16
     */
     if (a > b)
       swapxy(a, b);
-    GGL::drawFastHLine(a, y, b - a + 1, color, buffer);
+    GGL::drawFastHLine(a, y, b - a + 1, color);
   }
 }
 

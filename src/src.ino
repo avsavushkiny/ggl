@@ -1,19 +1,19 @@
-#include "er_lcd.h"
+#include "ggl.h"
 #include <WiFi.h>
 
+GGL ggl;
 
-//int lcd_buf[256 * 160/4];
-
-
-void setup() {
-
-  //Serial.begin(115200);
-  //er_lcd_begin();
-  //Serial.print("LCD Example\n");
- 
+void setup() 
+{
+  ggl.begin();
 }
 
 void loop() {
+
+  ggl.clear();
+  ggl.bitmapGray(0, 0, grayScale, 256, 5);
+  ggl.displayGray();
+  delay(10000);
 
   /*set_display_rotate(ROTATE_0);
   er_lcd_clear(lcd_buf);

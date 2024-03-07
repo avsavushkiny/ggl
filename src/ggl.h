@@ -9,18 +9,17 @@
     [github]     https://github.com/avsavushkiny/ggl
 */
 
-#ifndef _GGL_H_
-#define _GGL_H_
+#ifndef _GGL_
+#define _GGL_
 
 #include <SPI.h>
 #include <Arduino.h>
 #include <stdint.h>
 #include <stdio.h>
 
-extern int WIDTH;
-extern int HEIGHT;
-extern int DISPLAY_ROTATE;
-extern int lcd_buf[256 * 160/4];
+extern int _WIDTH;
+extern int _HEIGHT;
+extern int _DISPLAY_ROTATE;
 
 #define ROTATE_0       0
 #define ROTATE_90      1
@@ -41,47 +40,44 @@ private:
     const uint8_t LCD_MOSI{23};
 
     void rotate(int ROTATE);
-    void command(int cmd);
-    void dat(int dat);
+    void transferCommand(int cmd);
+    void transferData(int dat);
     void SPIWrite_byte(int dat);
 
 public:
     /* setup display */
     void begin();
-    void display(int *pBuf);
+    void display();
     /* write bitmap-data */
-    void clear(int *buffer);
-    void pixel(int x, int y, char color, int *buffer);
-    void bitmap(int x, int y, const int *pBmp, int chWidth, int chHeight, int *buffer);
-    void pixelGray(int x, int y, char color, int* buffer);
-    void displayGray(int* pBuf);
-    void bitmapGray(int x,int y,const int *pBmp, int chWidth, int chHeight, int* buffer);
+    void clear();
+    void pixel(int x, int y, char color);
+    void bitmap(int x, int y, const int *pBmp, int chWidth, int chHeight);
+    void pixelGray(int x, int y, char color);
+    void displayGray();
+    void bitmapGray(int x,int y,const int *pBmp, int chWidth, int chHeight);
     /* write data */
-    void writeChar(unsigned char x, unsigned char y, char acsii, char size, char mode, int* buffer);
-    void writeChar1616(int x,int y,int chChar, int* buffer);
-    void writeChar3216(int x, int y, int chChar, int* buffer);
-    void writeString(int x, int y, const char *pString, int Size, int Mode, int* buffer);
+    void writeChar(unsigned char x, unsigned char y, char acsii, char size, char mode);
+    void writeChar1616(int x,int y,int chChar);
+    void writeChar3216(int x, int y, int chChar);
+    void writeString(int x, int y, const char *pString, int Size, int Mode);
     /* draw */
-    void drawSine(uint16_t y,uint16_t a,uint16_t n,uint16_t color,int* buffer);
-    void drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color,int* buffer);
-    void drawCircleHelper( int16_t x0, int16_t y0,int16_t r, int cornername, uint16_t color,int* buffer);
-    void drawLine(int16_t x0, int16_t y0,int16_t x1, int16_t y1,uint16_t color,int* buffer);
-    void drawRect(int16_t x, int16_t y,int16_t w, int16_t h,uint16_t color,int* buffer);
-    void drawFastVLine(int16_t x, int16_t y,int16_t h, uint16_t color,int* buffer);
-    void drawFastHLine(int16_t x, int16_t y,int16_t w, uint16_t color,int* buffer);
-    void drawRoundRect(int16_t x, int16_t y, int16_t w,int16_t h, int16_t r, uint16_t color,int* buffer);
-    void drawTriangle(int16_t x0, int16_t y0,int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color,int* buffer);
+    void drawSine(uint16_t y,uint16_t a,uint16_t n,uint16_t color);
+    void drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color);
+    void drawCircleHelper( int16_t x0, int16_t y0,int16_t r, int cornername, uint16_t color);
+    void drawLine(int16_t x0, int16_t y0,int16_t x1, int16_t y1,uint16_t color);
+    void drawRect(int16_t x, int16_t y,int16_t w, int16_t h,uint16_t color);
+    void drawFastVLine(int16_t x, int16_t y,int16_t h, uint16_t color);
+    void drawFastHLine(int16_t x, int16_t y,int16_t w, uint16_t color);
+    void drawRoundRect(int16_t x, int16_t y, int16_t w,int16_t h, int16_t r, uint16_t color);
+    void drawTriangle(int16_t x0, int16_t y0,int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color);
 
-    void drawFillCircle(int16_t x0, int16_t y0, int16_t r,uint16_t color,int* buffer);
-    void drawFillCircleHelper(int16_t x0, int16_t y0, int16_t r,int cornername, int16_t delta, uint16_t color, int* buffer);
-    void drawFillRect(int16_t x, int16_t y, int16_t w, int16_t h,uint16_t color,int* buffer);
-    void drawFillRoundRect(int16_t x, int16_t y, int16_t w,int16_t h, int16_t r, uint16_t color,int* buffer);
-    void drawFillTriangle(int16_t x0, int16_t y0,int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color,int* buffer);
+    void drawFillCircle(int16_t x0, int16_t y0, int16_t r,uint16_t color);
+    void drawFillCircleHelper(int16_t x0, int16_t y0, int16_t r,int cornername, int16_t delta, uint16_t color);
+    void drawFillRect(int16_t x, int16_t y, int16_t w, int16_t h,uint16_t color);
+    void drawFillRoundRect(int16_t x, int16_t y, int16_t w,int16_t h, int16_t r, uint16_t color);
+    void drawFillTriangle(int16_t x0, int16_t y0,int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color);
 
 };
-
-
-
 
 
 /*
@@ -98,8 +94,6 @@ void testTriangles(int* buffer);
 void testFilledTriangles(int* buffer);
 void testRoundRects(int* buffer); 
 void testFilledRoundRects(int* buffer); */
-
-
 
 //gray scale test 256px - 5px
 const int grayScale[] = {

@@ -52,19 +52,15 @@ void loop() {
   delay(3000);
 
   er_lcd_clear(lcd_buf);
-  er_lcd_bitmap_gray(0, 0, agent2, 48, 48, lcd_buf);
+  er_lcd_bitmap_gray(0, 0, agent1, 32, 32, lcd_buf);
   er_lcd_display_gray(lcd_buf);  
   delay(10000);
 
   er_lcd_clear(lcd_buf);
-  er_lcd_bitmap_gray(0, 0, agent1, 48, 48, lcd_buf);
+  er_lcd_bitmap_gray(0, 0, grayScale, 256, 5, lcd_buf);
   er_lcd_display_gray(lcd_buf);  
   delay(10000);
   
-  er_lcd_clear(lcd_buf);
-  er_lcd_bitmap(0, 0, agent_ii, 48, 48, lcd_buf);
-  er_lcd_display(lcd_buf);  
-  delay(10000);
 
   set_display_rotate(ROTATE_0);
  

@@ -60,6 +60,8 @@ public:
     void writeChar1616(int x,int y,int chChar);
     void writeChar3216(int x, int y, int chChar);
     void writeString(int x, int y, const char *pString, int Size, int Mode);
+    void writeGrayChar(unsigned char x, unsigned char y, char acsii, char size, char mode);
+    void writeGrayString(int x, int y, const char *pString, int Size, int Mode);
     /* draw */
     void drawSine(uint16_t y,uint16_t a,uint16_t n,uint16_t color);
     void drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color);

@@ -375,6 +375,66 @@ void GGL::writeChar3216(int x, int y, int chChar)
     }
   }
 }
+void GGL::writeGrayChar(unsigned char x, unsigned char y, char acsii, char size, char mode)
+{
+  unsigned char i, j, y0 = y;
+  char temp;
+  unsigned char ch = acsii - ' ';
+  for (i = 0; i < size; i++)
+  {
+    if (size == 12)
+    {
+      if (mode)
+        temp = pgm_read_byte(&Font1206[ch][i]);
+      else
+        temp = ~pgm_read_byte(&Font1206[ch][i]);
+    }
+    else
+    {
+      if (mode)
+        temp = pgm_read_byte(&Font1608[ch][i]);
+      else
+        temp = ~pgm_read_byte(&Font1608[ch][i]);
+    }
+    for (j = 0; j < 8; j++)
+    {
+      if (temp & 0x80)
+        GGL::pixel(x, y, 1);
+      else
+        GGL::pixel(x, y, 0);
+      temp <<= 1;
+      y++;
+      if ((y - y0) == size)
+      {
+        y = y0;
+        x++;
+        break;
+      }
+    }
+  }
+}
+void GGL::writeGrayString(int x, int y, const char *pString, int Size, int Mode)
+{
+  int yy = y * 2;
+  
+  while (*pString != '\0')
+  {
+    if (x > (_WIDTH - Size / 2))
+    {
+      x = 0;
+      yy += Size;
+      if (yy > (_HEIGHT - Size))
+      {
+        yy = x = 0;
+      }
+    }
+
+    GGL::writeGrayChar(x, yy, *pString, Size, Mode);
+    x += Size / 2;
+    pString++;
+  }
+}
+
 
 void GGL::drawSine(uint16_t y, uint16_t a, uint16_t n, uint16_t color)
 {
@@ -750,7 +810,6 @@ void GGL::drawXBMP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *bi
 }
 }
 /* */
-
 
 
 /*

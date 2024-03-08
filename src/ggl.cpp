@@ -120,7 +120,8 @@ void GGL::begin()
 
   transferCommand(0xaf); // Display On
 
-  digitalWrite(LCD_BL, LOW);
+  digitalWrite(LCD_BL, 0x0);
+  //digitalWrite(LCD_BL, 1);
 }
 void GGL::display()
 {
@@ -225,9 +226,10 @@ void GGL::pixelGray(int x, int y, char color)
   else
     _LCD_BUFFER[x + (y / 8) * 256] &= ~(1 << (y % 8));
 }
-void GGL::bitmapGray(int x, int y, const int *pBmp, int chWidth, int chHeight)
+void GGL::bitmapGray(int x, int y, const uint8_t *pBmp, int chWidth, int chHeight)
 {
   int i, j, k;
+  int16_t yy = y * 2;
   int page = chHeight * 2 / 8;
 
   for (k = 0; k < page; k++)
@@ -238,7 +240,7 @@ void GGL::bitmapGray(int x, int y, const int *pBmp, int chWidth, int chHeight)
       {
         if (pgm_read_byte(pBmp + j + k * chWidth) & (0x01 << (i & 7)))
         {
-          GGL::pixelGray(x + j, y + i + k * 8, 1);
+          GGL::pixelGray(x + j, yy + i + k * 8, 1);
         }
       }
     }
@@ -331,6 +333,8 @@ void GGL::writeChar(unsigned char x, unsigned char y, char acsii, char size, cha
 }
 void GGL::writeString(int x, int y, const char *pString, int Size, int Mode)
 {
+  
+  
   while (*pString != '\0')
   {
     if (x > (_WIDTH - Size / 2))
@@ -695,9 +699,57 @@ void GGL::drawFillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16
 }
 
 
+/* copies of methods from the u8g2 library */
+/* clear buffer */
+void GGL::clearBuffer() //+
+{
+  size_t cnt;
+  cnt = _WIDTH;
+  cnt *= 20;
+  cnt *= 8;
+  memset(_LCD_BUFFER, 0, cnt);
+}
+/* draw bmp image-c-style, 4-gray-color */
+void GGL::drawGrayBMP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *bitmap)
+{
+  int i, j, k;
+  int page = h * 2 / 8;
+  int16_t yy = y * 2; 
 
-
-
+  for (k = 0; k < page; k++)
+  {
+    for (j = 0; j < w; j++)
+    {
+      for (i = 0; i < 8; i++)
+      {
+        if (pgm_read_byte(bitmap + j + k * w) & (0x01 << (i & 7)))
+        {
+          GGL::pixelGray(x + j, yy + i + k * 8, 1);
+        }
+      }
+    }
+  }
+}
+/* draw xbmp image-c-style, 1-bit-color */
+void GGL::drawXBMP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *bitmap)
+{
+{
+  int i, j, byteWidth = (w + 7) / 8;
+  for (j = 0; j < h; j++)
+  {
+    for (i = 0; i < w; i++)
+    {
+      if (pgm_read_byte(bitmap + j * byteWidth + i / 8) & (128 >> (i & 7)))
+      {
+        GGL::pixel(x + i, y + j, 1);
+      }
+      else
+        GGL::pixel(x + i, y + j, 0);
+    }
+  }
+}
+}
+/* */
 
 
 

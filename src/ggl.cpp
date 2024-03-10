@@ -293,6 +293,52 @@ void GGL::writeChar1616(int x, int y, int chChar)
     }
   }
 }
+void GGL::writeChar3216(int x, int y, int chChar)
+{
+  int i, j;
+  int chTemp = 0, y0 = y, chMode = 0;
+
+  for (i = 0; i < 64; i++)
+  {
+    chTemp = pgm_read_byte(&Font3216[chChar - 0x30][i]);
+    for (j = 0; j < 8; j++)
+    {
+      chMode = chTemp & 0x80 ? 1 : 0;
+      GGL::pixel(x, y, chMode);
+      chTemp <<= 1;
+      y++;
+      if ((y - y0) == 32)
+      {
+        y = y0;
+        x++;
+        break;
+      }
+    }
+  }
+}
+
+//Monochrome
+void GGL::writeString(int x, int y, const char *pString, int Size, int Mode)
+{
+  
+  
+  while (*pString != '\0')
+  {
+    if (x > (_WIDTH - Size / 2))
+    {
+      x = 0;
+      y += Size;
+      if (y > (_HEIGHT - Size))
+      {
+        y = x = 0;
+      }
+    }
+
+    GGL::writeChar(x, y, *pString, Size, Mode);
+    x += Size / 2;
+    pString++;
+  }
+}
 void GGL::writeChar(unsigned char x, unsigned char y, char acsii, char size, char mode)
 {
   unsigned char i, j, y0 = y;
@@ -331,48 +377,27 @@ void GGL::writeChar(unsigned char x, unsigned char y, char acsii, char size, cha
     }
   }
 }
-void GGL::writeString(int x, int y, const char *pString, int Size, int Mode)
+
+//Gray
+void GGL::writeGrayString(int x, int y, const char *pString, int Size, int Mode)
 {
-  
+  int yy = y * 2;
   
   while (*pString != '\0')
   {
     if (x > (_WIDTH - Size / 2))
     {
       x = 0;
-      y += Size;
-      if (y > (_HEIGHT - Size))
+      yy += Size;
+      if (yy > (_HEIGHT - Size))
       {
-        y = x = 0;
+        yy = x = 0;
       }
     }
 
-    GGL::writeChar(x, y, *pString, Size, Mode);
+    GGL::writeGrayChar(x, yy, *pString, Size, Mode);
     x += Size / 2;
     pString++;
-  }
-}
-void GGL::writeChar3216(int x, int y, int chChar)
-{
-  int i, j;
-  int chTemp = 0, y0 = y, chMode = 0;
-
-  for (i = 0; i < 64; i++)
-  {
-    chTemp = pgm_read_byte(&Font3216[chChar - 0x30][i]);
-    for (j = 0; j < 8; j++)
-    {
-      chMode = chTemp & 0x80 ? 1 : 0;
-      GGL::pixel(x, y, chMode);
-      chTemp <<= 1;
-      y++;
-      if ((y - y0) == 32)
-      {
-        y = y0;
-        x++;
-        break;
-      }
-    }
   }
 }
 void GGL::writeGrayChar(unsigned char x, unsigned char y, char acsii, char size, char mode)
@@ -396,6 +421,7 @@ void GGL::writeGrayChar(unsigned char x, unsigned char y, char acsii, char size,
       else
         temp = ~pgm_read_byte(&Font1608[ch][i]);
     }
+
     for (j = 0; j < 8; j++)
     {
       if (temp & 0x80)
@@ -411,27 +437,6 @@ void GGL::writeGrayChar(unsigned char x, unsigned char y, char acsii, char size,
         break;
       }
     }
-  }
-}
-void GGL::writeGrayString(int x, int y, const char *pString, int Size, int Mode)
-{
-  int yy = y * 2;
-  
-  while (*pString != '\0')
-  {
-    if (x > (_WIDTH - Size / 2))
-    {
-      x = 0;
-      yy += Size;
-      if (yy > (_HEIGHT - Size))
-      {
-        yy = x = 0;
-      }
-    }
-
-    GGL::writeGrayChar(x, yy, *pString, Size, Mode);
-    x += Size / 2;
-    pString++;
   }
 }
 
@@ -527,6 +532,7 @@ void GGL::drawCircleHelper(int16_t x0, int16_t y0, int16_t r, int cornername, ui
 void GGL::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color)
 {
   int16_t steep = abs(y1 - y0) > abs(x1 - x0);
+  
   if (steep)
   {
     swapxy(x0, y0);
@@ -809,294 +815,21 @@ void GGL::drawXBMP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *bi
   }
 }
 }
-/* */
-
-
-/*
-void demo_game(int *buffer)
-{
-  uint16_t cs = 200;
-  int r = 5;          // Radius
-  int i = 3;          // Stepping variables
-  int x = 5, y = 5;   // Starting position
-  int dx = i, dy = i; // Stepping
-  int x1, y1;         // Save the last position
-
-  while (cs--)
-  {
-    drawCircle(x1, y1, r, 0, buffer);
-    x1 = x, y1 = y; // Save location
-    if ((x - r) < 0)
-      dx = i;
-    if ((x + r) > WIDTH - 1)
-      dx = -i;
-    if ((y - r) < 0)
-      dy = i;
-    if ((y + r) > HEIGHT - 1)
-      dy = -i;
-    x += dx;
-    y += dy;
-    delay(100);
-    drawCircle(x1, y1, r, 1, buffer); // Disappear before a round
-    er_lcd_pixel(x1, y1, 1, buffer);  // Locus
-    er_lcd_display(buffer);
-  }
-}
-void demo_sine(int *buffer)
-{
-  drawFastHLine(0, HEIGHT / 2, WIDTH, 1, buffer);
-  drawFastVLine(WIDTH / 2, 0, HEIGHT, 1, buffer);
-
-  drawSine(HEIGHT / 2, HEIGHT / 4, 5, 1, buffer);
-  er_lcd_display(buffer);
-  delay(1000);
-  drawSine(HEIGHT / 2, HEIGHT / 3, 4, 1, buffer);
-  er_lcd_display(buffer);
-  delay(1000);
-}
-
-void testLines(int *buffer)
-{
-  int x1, y1, x2, y2, w = WIDTH, h = HEIGHT;
-  int color = 1;
-  x1 = y1 = 0;
-  y2 = h - 1;
-
-  for (x2 = 0; x2 < w; x2 += 6)
-  {
-    drawLine(x1, y1, x2, y2, color, buffer);
-    er_lcd_display(buffer);
-    delay(30);
-  }
-  x2 = w - 1;
-  for (y2 = 0; y2 < h; y2 += 6)
-  {
-    drawLine(x1, y1, x2, y2, color, buffer);
-    er_lcd_display(buffer);
-    delay(30);
-  }
-
-  delay(1000);
-  er_lcd_clear(buffer);
-
-  x1 = w - 1;
-  y1 = 0;
-  y2 = h - 1;
-
-  for (x2 = 0; x2 < w; x2 += 6)
-  {
-    drawLine(x1, y1, x2, y2, color, buffer);
-    er_lcd_display(buffer);
-    delay(30);
-  }
-  x2 = 0;
-  for (y2 = 0; y2 < h; y2 += 6)
-  {
-    drawLine(x1, y1, x2, y2, color, buffer);
-    er_lcd_display(buffer);
-    delay(30);
-  }
-
-  delay(1000);
-  er_lcd_clear(buffer);
-
-  x1 = 0;
-  y1 = h - 1;
-  y2 = 0;
-
-  for (x2 = 0; x2 < w; x2 += 6)
-  {
-    drawLine(x1, y1, x2, y2, color, buffer);
-    er_lcd_display(buffer);
-    delay(30);
-  }
-  x2 = w - 1;
-  for (y2 = 0; y2 < h; y2 += 6)
-  {
-    drawLine(x1, y1, x2, y2, color, buffer);
-    er_lcd_display(buffer);
-    delay(30);
-  }
-
-  delay(1000);
-  er_lcd_clear(buffer);
-
-  x1 = w - 1;
-  y1 = h - 1;
-  y2 = 0;
-
-  for (x2 = 0; x2 < w; x2 += 6)
-  {
-    drawLine(x1, y1, x2, y2, color, buffer);
-    er_lcd_display(buffer);
-    delay(30);
-  }
-  x2 = 0;
-  for (y2 = 0; y2 < h; y2 += 6)
-  {
-    drawLine(x1, y1, x2, y2, color, buffer);
-    er_lcd_display(buffer);
-    delay(30);
-  }
-
-  delay(1000);
-}
-
-void testFastLines(int *buffer)
-{
-
-  int x, y, w = WIDTH, h = HEIGHT;
-
-  for (y = 0; y < h; y += 5)
-  {
-    drawFastHLine(0, y, w, 1, buffer);
-    er_lcd_display(buffer);
-    delay(30);
-  }
-  for (x = 0; x < w; x += 5)
-  {
-    drawFastVLine(x, 0, h, 1, buffer);
-    er_lcd_display(buffer);
-    delay(30);
-  }
-
-  delay(1000);
-}
-
-void testRects(int *buffer)
-{
-
-  int n, i, i2,
-      cx = WIDTH / 2,
-      cy = HEIGHT / 2;
-
-  n = min(WIDTH, HEIGHT);
-
-  for (i = 2; i < n; i += 6)
-  {
-    i2 = i / 2;
-    drawRect(cx - i2, cy - i2, i, i, 1, buffer);
-    er_lcd_display(buffer);
-    delay(150);
-  }
-}
-
-void testFilledRects(int *buffer)
-{
-
-  int n, i, i2,
-      cx = WIDTH / 2 - 1,
-      cy = HEIGHT / 2 - 1;
-
-  n = min(WIDTH, HEIGHT);
-  for (i = n; i > 0; i -= 6)
-  {
-    i2 = i / 2;
-
-    fillRect(cx - i2, cy - i2, i, i, 1, buffer);
-    er_lcd_display(buffer);
-    delay(150);
-    er_lcd_clear(buffer);
-
-    // Outlines are not included in timing results
-    //   drawRect(cx-i2, cy-i2, i, i, 1, buffer);  er_lcd_display(buffer);  delay(150);   er_lcd_clear(buffer);
-  }
-}
-
-void testFilledCircles(int radius, int *buffer)
-{
-  int x, y, w = WIDTH, h = HEIGHT, r2 = radius * 2;
-
-  for (x = radius; x < w; x += r2)
-  {
-    for (y = radius; y < h; y += r2)
-    {
-      fillCircle(x, y, radius, 1, buffer);
-      er_lcd_display(buffer);
-      delay(50);
-    }
-  }
-}
-
-void testCircles(int radius, int *buffer)
-{
-  int x, y, w = WIDTH, h = HEIGHT, r2 = radius * 2;
-
-  for (x = radius; x < w; x += r2)
-  {
-    for (y = radius; y < h; y += r2)
-    {
-      drawCircle(x, y, radius, 1, buffer);
-      er_lcd_display(buffer);
-      delay(50);
-    }
-  }
-}
-
-void testTriangles(int *buffer)
-{
-  int n, i, cx = WIDTH / 2 - 1,
-            cy = HEIGHT / 2 - 1;
-
-  n = min(cx, cy);
-  for (i = 0; i < n; i += 5)
-  {
-    drawTriangle(
-        cx, cy - i,     // peak
-        cx - i, cy + i, // bottom left
-        cx + i, cy + i, // bottom right
-        1, buffer);
-    er_lcd_display(buffer);
-    delay(150);
-  }
-}
-
-void testFilledTriangles(int *buffer)
-{
-  int i, cx = WIDTH / 2 - 1,
-         cy = HEIGHT / 2 - 1;
-
-  for (i = min(cx, cy); i > 10; i -= 5)
-  {
-
-    fillTriangle(cx, cy - i, cx - i, cy + i, cx + i, cy + i, 1, buffer);
-    er_lcd_display(buffer);
-    delay(150);
-    er_lcd_clear(buffer);
-
-    //   drawTriangle(cx, cy - i, cx - i, cy + i, cx + i, cy + i,1, buffer);  er_lcd_display(buffer);  delay(150);   er_lcd_clear(buffer);
-  }
-}
-
-void testRoundRects(int *buffer)
-{
-  int w, i, i2,
-      cx = WIDTH / 2 - 1,
-      cy = HEIGHT / 2 - 1;
-
-  w = min(WIDTH, HEIGHT);
-  for (i = 0; i < w; i += 6)
-  {
-    i2 = i / 2;
-    drawRoundRect(cx - i2, cy - i2, i, i, i / 8, 1, buffer);
-    er_lcd_display(buffer);
-    delay(150);
-  }
-}
-
-void testFilledRoundRects(int *buffer)
-{
-  int i, i2,
-      cx = WIDTH / 2 - 1,
-      cy = HEIGHT / 2 - 1;
-
-  for (i = min(WIDTH, HEIGHT); i > 20; i -= 6)
-  {
-    i2 = i / 2;
-    fillRoundRect(cx - i2, cy - i2, i, i, i / 8, 1, buffer);
-    er_lcd_display(buffer);
-    delay(150);
-    er_lcd_clear(buffer);
-  }
-}
-*/
+/* 
+void drawBox(int x, int y, int w, int h);
+void drawCircle(int x0, int y0, int rad);
+void drawDisc(int x0, int y0, int rad);
+void drawEllipse(int x0, int y0, int rx, int ry);
+void drawFilledEllipse(int x0, int y0, int rx, int ry);
+void drawFrame(int x, int y, int w, int h);
+void drawHLine(int x, int y, int w);
+void drawLine(int x0, int y0, int x1, int y1);
+void drawPixel(int x, int y);
+void drawRBox(int x, int y, int w, int h, int r);
+void drawRFrame(int x, int y, int w, int h, int r);
+uint8_t drawStr(int x, int y, const char *s);
+uint8_t drawStrX2(int x, int y, const char *s);
+void drawTriangle(int x0, int y0, int x1, int y1, int x2, int y2);
+void drawVLine(int x, int y, int h);
+void setCursor(int x, int y);
+void setContrast(int value);*/

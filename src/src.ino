@@ -20,7 +20,7 @@ void loop()
 
   // gray
   ggl.clearBuffer();
-  ggl.bitmapGray(106, 58, ex_g, 44, 44);
+  ggl.bitmapGray(10, 10, toggle, 32, 32);
   ggl.writeGrayString(0, 10, "Experience", 12, 1);
   ggl.displayGray();
   delay(5000);

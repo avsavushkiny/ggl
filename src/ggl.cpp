@@ -395,7 +395,7 @@ void GGL::writeGrayString(int x, int y, const char *pString, int Size, int Mode)
       }
     }
 
-    GGL::writeGrayChar(x, yy, *pString, Size, Mode);
+    GGL::writeGrayChar2(x, yy, *pString, Size, Mode);
     x += Size / 2;
     pString++;
   }
@@ -436,6 +436,75 @@ void GGL::writeGrayChar(unsigned char x, unsigned char y, char acsii, char size,
         x++;
         break;
       }
+    }
+  }
+}
+
+//!
+void GGL::writeGrayChar2(unsigned char x, unsigned char y, char acsii, char size, char mode) {
+  unsigned char i, j, y0 = y;
+  char temp;
+  unsigned char ch = acsii - ' ';
+
+  for (i = 0; i < size; i++) {
+      if (size == 12) {
+          if (mode)
+              temp = pgm_read_byte(&Font1206[ch][i]);
+          else
+              temp = ~pgm_read_byte(&Font1206[ch][i]);
+      } else {
+          if (mode)
+              temp = pgm_read_byte(&Font1608[ch][i]);
+          else
+              temp = ~pgm_read_byte(&Font1608[ch][i]);
+      }
+
+      // for (j = 0; j < 8; j++) {
+      //     if (temp & 0x80)
+      //     {
+      //       GGL::pixel(x, y, 1);
+      //       GGL::pixel(x, y + j, 1); // Градация серого
+      //     }
+      //     else
+      //     {
+      //       GGL::pixel(x, y, 0);
+      //       GGL::pixel(x, y + j, 0);   // Градация серого
+      //     }
+              
+      //     temp <<= 1;
+      //     y++;
+      //     if ((y - y0) == size) {
+      //         y = y0;
+      //         x++;
+      //         break;
+      //     }
+      // }
+
+      for (j = 0; j < 8; j++) {
+        if (temp & 0x80) {
+            // Отрисовка первого пикселя
+            GGL::pixel(x, y, 1);
+            // Отрисовка второго пикселя со смещением на 1 по вертикали
+            GGL::pixel(x, y + 1, 1);
+        } else {
+            // Отрисовка первого пикселя
+            GGL::pixel(x, y, 0);
+            // Отрисовка второго пикселя со смещением на 1 по вертикали
+            GGL::pixel(x, y + 1, 0);
+        }
+    
+        // Сдвигаем бит для обработки следующего
+        temp <<= 1;
+    
+        // Увеличиваем y на 2, так как каждый бит отрисовывается дважды
+        y++;
+    
+        // Проверка выхода за границу высоты символа
+        if ((y - y0) >= size) {
+            y = y0; // Сброс y
+            x++;    // Переход к следующему столбцу
+            break;
+        }
     }
   }
 }

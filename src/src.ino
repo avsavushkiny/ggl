@@ -1,5 +1,5 @@
 #include "ggl.h"
-#include <WiFi.h>
+
 
 GGL ggl;
 
@@ -20,8 +20,8 @@ void loop()
 
   // gray
   ggl.clearBuffer();
-  ggl.bitmapGray(5, 10, toggle, 32, 32);
-  ggl.writeGrayString(5, 50, "Experience", 12, 1);
+  ggl.bitmapGray(5, 10, cd, 40, 40);
+  ggl.writeGrayString(5, 60, "Experience", 12, 1);
   ggl.displayGray();
   delay(5000);
 }

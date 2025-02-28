@@ -4,7 +4,7 @@ int _WIDTH;
 int _HEIGHT;
 int _DISPLAY_ROTATE;
 
-int _LCD_BUFFER[256 * 160/4]; //10240
+int _LCD_BUFFER[256 * 160 / 4]; // 10240
 
 void GGL::rotate(int ROTATE)
 {
@@ -94,7 +94,7 @@ void GGL::begin()
   transferData(0x28);
   transferCommand(0x15);
   transferData(0x00);
-  transferData(0xFF);    // xe 256
+  transferData(0xFF); // xe 256
 
   transferData(0xA6);
 
@@ -112,7 +112,7 @@ void GGL::begin()
 
   transferCommand(0xCA); // Display Control
   transferData(0x00);
-  transferData(0x9f);    // duty 160
+  transferData(0x9f); // duty 160
   transferData(0x00);
 
   transferCommand(0xBC); // Data Scan Direction
@@ -121,14 +121,14 @@ void GGL::begin()
   transferCommand(0xaf); // Display On
 
   digitalWrite(LCD_BL, 0x01);
-  //digitalWrite(LCD_BL, 1);
+  // digitalWrite(LCD_BL, 1);
 }
 void GGL::display()
 {
   int page, i;
 
   transferCommand(0xf0); // Display Mode
-  transferData(0x10);     // Monochrome Mode
+  transferData(0x10);    // Monochrome Mode
 
   transferCommand(0x15);
   transferData(0x00);
@@ -149,7 +149,7 @@ void GGL::display()
 void GGL::clear()
 {
   int i;
-  for (i = 0; i <= _WIDTH * (_HEIGHT/4); i++)
+  for (i = 0; i <= _WIDTH * (_HEIGHT / 4); i++)
   {
     _LCD_BUFFER[i] = 0;
   }
@@ -218,29 +218,33 @@ void GGL::bitmap(int x, int y, const int *pBmp, int chWidth, int chHeight)
 }
 void GGL::pixelGray(int x, int y, char color)
 {
-  GGL::rotate(ROTATE_0);
-  if (x > 256 || y > 256 * 2)
-    return;
-  if (color)
-    _LCD_BUFFER[x + (y / 8) * 256] |= 1 << (y % 8);
+  GGL::rotate(ROTATE_0);                            // Поворачиваем экран на 0 градусов
+  if (x > 256 || y > 256 * 2)                       // Если координаты пикселя находятся за пределами экрана
+    return;                                         // Выходим из функции
+  if (color)                                        // Если цвет пикселя не равен 0
+    _LCD_BUFFER[x + (y / 8) * 256] |= 1 << (y % 8); // Устанавливаем бит в буфере экрана
   else
-    _LCD_BUFFER[x + (y / 8) * 256] &= ~(1 << (y % 8));
+    _LCD_BUFFER[x + (y / 8) * 256] &= ~(1 << (y % 8)); // Сбрасываем бит в буфере экрана
 }
+
 void GGL::bitmapGray(int x, int y, const uint8_t *pBmp, int chWidth, int chHeight)
 {
   int i, j, k;
-  int16_t yy = y * 2;
-  int page = chHeight * 2 / 8; if (page == 0) page = 1;
+  int16_t yy = y * 2;          // Удваиваем координату y
+  int page = chHeight * 2 / 8; // Вычисляем количество страниц
+  if (page == 0)               // Если количество страниц равно 0
+    page = 1;                  // Устанавливаем количество страниц равным 1
 
-  for (k = 0; k < page; k++)
+  for (k = 0; k < page; k++) // Цикл по страницам
   {
-    for (j = 0; j < chWidth; j++)
+    for (j = 0; j < chWidth; j++) // Цикл по ширине символа
     {
-      for (i = 0; i < 8; i++)
+      for (i = 0; i < 8; i++) // Цикл по высоте символа
       {
-        if (pgm_read_byte(pBmp + j + k * chWidth) & (0x01 << (i & 7)))
+        /*  */
+        if (pgm_read_byte(pBmp + j + k * chWidth) & (0x01 << (i & 7))) // Если бит в битовой карте равен 1
         {
-          GGL::pixelGray(x + j, yy + i + k * 8, 1);
+          GGL::pixelGray(x + j, yy + i + k * 8, 1); // Рисуем пиксель
         }
       }
     }
@@ -251,7 +255,7 @@ void GGL::displayGray()
   int page, i;
 
   transferCommand(0xf0); // Display Mode
-  transferData(0x11);     // 4Gray  Mode
+  transferData(0x11);    // 4Gray  Mode
 
   transferCommand(0x15);
   transferData(0x00);
@@ -261,7 +265,7 @@ void GGL::displayGray()
   transferData(0x28);
   transferCommand(0x5c);
 
-  for (page = 0; page < 160/4; page++)
+  for (page = 0; page < 160 / 4; page++)
   {
     for (i = 0; i < 256; i++)
     {
@@ -270,14 +274,15 @@ void GGL::displayGray()
   }
 }
 
-
 /*изменениея*/
-void GGL::drawText(int x, int y, const String &text, const uint8_t *font) {
+void GGL::drawText(int x, int y, const String &text, const uint8_t *font)
+{
   int cursorX = x; // Начальная позиция по X
   int cursorY = y; // Начальная позиция по Y
 
   // Проходим по каждому символу в строке
-  for (int i = 0; i < text.length(); i++) {
+  for (int i = 0; i < text.length(); i++)
+  {
     char currentChar = text.charAt(i); // Текущий символ
 
     // Вычисляем смещение в массиве font для текущего символа
@@ -294,8 +299,6 @@ void GGL::drawText(int x, int y, const String &text, const uint8_t *font) {
     cursorX += 5; // Ширина символа + 1 пиксель для пробела между символами
   }
 }
-
-
 
 void GGL::writeChar1616(int x, int y, int chChar)
 {
@@ -344,11 +347,10 @@ void GGL::writeChar3216(int x, int y, int chChar)
   }
 }
 
-//Monochrome
+// Monochrome
 void GGL::writeString(int x, int y, const char *pString, int Size, int Mode)
 {
-  
-  
+
   while (*pString != '\0')
   {
     if (x > (_WIDTH - Size / 2))
@@ -405,11 +407,11 @@ void GGL::writeChar(unsigned char x, unsigned char y, char acsii, char size, cha
   }
 }
 
-//Gray
+// Gray
 void GGL::writeGrayString(int x, int y, const char *pString, int Size, int Mode)
 {
   int yy = y * 2;
-  
+
   while (*pString != '\0')
   {
     if (x > (_WIDTH - Size / 2))
@@ -422,7 +424,7 @@ void GGL::writeGrayString(int x, int y, const char *pString, int Size, int Mode)
       }
     }
 
-    GGL::writeGrayChar2(x, yy, *pString, Size, Mode);
+    GGL::writeGrayChar(x, yy, *pString, Size, Mode);
     x += Size / 2;
     pString++;
   }
@@ -432,6 +434,7 @@ void GGL::writeGrayChar(unsigned char x, unsigned char y, char acsii, char size,
   unsigned char i, j, y0 = y;
   char temp;
   unsigned char ch = acsii - ' ';
+  
   for (i = 0; i < size; i++)
   {
     if (size == 12)
@@ -449,93 +452,32 @@ void GGL::writeGrayChar(unsigned char x, unsigned char y, char acsii, char size,
         temp = ~pgm_read_byte(&Font1608[ch][i]);
     }
 
-    for (j = 0; j < 8; j++)
+    for (j = 0; j < 8; j++) // Цикл, который выполняется 8 раз
     {
-      if (temp & 0x80)
-        GGL::pixel(x, y, 1);
-      else
-        GGL::pixel(x, y, 0);
-      temp <<= 1;
-      y++;
-      if ((y - y0) == size)
+      if (temp & 0x80)           // Если старший бит в temp равен 1
       {
-        y = y0;
-        x++;
-        break;
+        GGL::pixelGray(x, y, 1); // Рисуем белый пиксель на текущей строке
+        GGL::pixelGray(x, y + 1, 1); // Рисуем белый пиксель на строке ниже
+      }
+      else
+      {
+        GGL::pixelGray(x, y, 0); // Рисуем черный пиксель на текущей строке
+        GGL::pixelGray(x, y + 1, 0); // Рисуем черный пиксель на строке ниже
+      }
+
+      temp <<= 1; // Сдвигаем temp на один бит влево
+
+      y += 2; // Переходим к следующему пикселю вниз (пропускаем строку)
+
+      if ((y - y0) >= size * 2) // Если мы достигли конца строки (учитываем удвоение строк)
+      {
+        y = y0; // Возвращаемся к началу строки
+        x++;    // Переходим к следующему столбцу
+        break;  // Выходим из цикла
       }
     }
   }
 }
-
-//!
-void GGL::writeGrayChar2(unsigned char x, unsigned char y, char acsii, char size, char mode) {
-  unsigned char i, j, y0 = y;
-  char temp;
-  unsigned char ch = acsii - ' ';
-
-  for (i = 0; i < size; i++) {
-      if (size == 12) {
-          if (mode)
-              temp = pgm_read_byte(&Font1206[ch][i]);
-          else
-              temp = ~pgm_read_byte(&Font1206[ch][i]);
-      } else {
-          if (mode)
-              temp = pgm_read_byte(&Font1608[ch][i]);
-          else
-              temp = ~pgm_read_byte(&Font1608[ch][i]);
-      }
-
-      // for (j = 0; j < 8; j++) {
-      //     if (temp & 0x80)
-      //     {
-      //       GGL::pixel(x, y, 1);
-      //       GGL::pixel(x, y + j, 1); // Градация серого
-      //     }
-      //     else
-      //     {
-      //       GGL::pixel(x, y, 0);
-      //       GGL::pixel(x, y + j, 0);   // Градация серого
-      //     }
-              
-      //     temp <<= 1;
-      //     y++;
-      //     if ((y - y0) == size) {
-      //         y = y0;
-      //         x++;
-      //         break;
-      //     }
-      // }
-
-      for (j = 0; j < 8; j++) {
-        if (temp & 0x80) {
-            // Отрисовка первого пикселя
-            GGL::pixel(x, y, 1);
-            // Отрисовка второго пикселя со смещением на 1 по вертикали
-            GGL::pixel(x, y + 1, 1);
-        } else {
-            // Отрисовка первого пикселя
-            GGL::pixel(x, y, 0);
-            // Отрисовка второго пикселя со смещением на 1 по вертикали
-            GGL::pixel(x, y + 1, 0);
-        }
-    
-        // Сдвигаем бит для обработки следующего
-        temp <<= 1;
-    
-        // Увеличиваем y на 2, так как каждый бит отрисовывается дважды
-        y++;
-    
-        // Проверка выхода за границу высоты символа
-        if ((y - y0) >= size) {
-            y = y0; // Сброс y
-            x++;    // Переход к следующему столбцу
-            break;
-        }
-    }
-  }
-}
-
 
 void GGL::drawSine(uint16_t y, uint16_t a, uint16_t n, uint16_t color)
 {
@@ -628,7 +570,7 @@ void GGL::drawCircleHelper(int16_t x0, int16_t y0, int16_t r, int cornername, ui
 void GGL::drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color)
 {
   int16_t steep = abs(y1 - y0) > abs(x1 - x0);
-  
+
   if (steep)
   {
     swapxy(x0, y0);
@@ -860,7 +802,6 @@ void GGL::drawFillTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16
   }
 }
 
-
 /* copies of methods from the u8g2 library */
 /* clear buffer */
 void GGL::clearBuffer() //+
@@ -876,7 +817,7 @@ void GGL::drawGrayBMP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t 
 {
   int i, j, k;
   int page = h * 2 / 8;
-  int16_t yy = y * 2; 
+  int16_t yy = y * 2;
 
   for (k = 0; k < page; k++)
   {
@@ -895,23 +836,23 @@ void GGL::drawGrayBMP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t 
 /* draw xbmp image-c-style, 1-bit-color */
 void GGL::drawXBMP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *bitmap)
 {
-{
-  int i, j, byteWidth = (w + 7) / 8;
-  for (j = 0; j < h; j++)
   {
-    for (i = 0; i < w; i++)
+    int i, j, byteWidth = (w + 7) / 8;
+    for (j = 0; j < h; j++)
     {
-      if (pgm_read_byte(bitmap + j * byteWidth + i / 8) & (128 >> (i & 7)))
+      for (i = 0; i < w; i++)
       {
-        GGL::pixel(x + i, y + j, 1);
+        if (pgm_read_byte(bitmap + j * byteWidth + i / 8) & (128 >> (i & 7)))
+        {
+          GGL::pixel(x + i, y + j, 1);
+        }
+        else
+          GGL::pixel(x + i, y + j, 0);
       }
-      else
-        GGL::pixel(x + i, y + j, 0);
     }
   }
 }
-}
-/* 
+/*
 void drawBox(int x, int y, int w, int h);
 void drawCircle(int x0, int y0, int rad);
 void drawDisc(int x0, int y0, int rad);

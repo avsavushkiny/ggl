@@ -86,6 +86,8 @@ public:
     void drawGrayBMP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *bitmap);
     void drawXBMP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *bitmap);
 
+    /*изменениея*/
+    void drawText(int x, int y, const String &text, const uint8_t *font);
 };
 
 
@@ -552,19 +554,18 @@ const uint8_t cd[] =   { /* 0X22,0X02,0X28,0X00,0X28,0X00, */
     0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X03,0X03,0X0E,0X0E,0X3B,0X39,0XEE,0XEE,0X3A,
     0X3B,0X0E,0X0E,0X03,0X03,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,0X00,
     };
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
+const uint8_t gs[8] = { /* 0X22,0X02,0X08,0X00,0X01,0X00, */
+    0X03,0X03,0X02,0X02,0X01,0X01,0X00,0X00,};
+
+const uint8_t font[] = {
+    // Символ ' ' (пробел)
+    0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,// 10 строк по 5 пикселей
+    // Символ 'A'
+    0XC0,0X30,0X0C,0X30,0XC0,0XFF,0X30,0X30,0X30,0XFF,0X0F,0X00,0X00,0X00,0X0F,
+    // Символ 'B'
+    0XFC,0X0C,0X0C,0X0C,0XF0,0XFF,0X0C,0X0C,0X0C,0XF3,0X0F,0X0C,0X0C,0X0C,0X03,
+    // И так далее...
+};
 
 #endif

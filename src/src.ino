@@ -21,7 +21,10 @@ void loop()
   // gray
   ggl.clearBuffer();
   ggl.bitmapGray(5, 10, cd, 40, 40);
-  ggl.writeGrayString(5, 60, "Experience", 12, 1);
+  ggl.bitmapGray(0, 50, grayScale, 256, 5);
+  ggl.bitmapGray(0, 80, gs, 8, 2);
+  ggl.writeGrayString(50, 20, "Experience", 12, 1);
+  ggl.drawText(160, 20, "ABBA", font);
   ggl.displayGray();
   delay(5000);
 }

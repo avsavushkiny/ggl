@@ -20,11 +20,17 @@ void loop()
 
   // gray
   ggl.clearBuffer();
-  ggl.bitmapGray(5, 10, cd, 40, 40);
-  ggl.bitmapGray(0, 50, grayScale, 256, 5);
-  ggl.bitmapGray(0, 80, gs, 8, 2);
-  ggl.writeGrayString(50, 20, "Experience", 12, 1);
-  ggl.drawText(160, 20, "ABBA", font);
+  ggl.bitmapGray(0, 0, cd, 40, 40);
+  ggl.bitmapGray(0, 155, grayScale, 256, 5);
+
+  ggl.writeGrayString(45, 0, "QWERTYUIOP 0123456789", 12, 1);
+  ggl.writeGrayString(45, 10, "ASDFGHJKL., ZXCVBNM<>", 12, 1);
+  ggl.writeGrayString(45, 20, "qwertyuiop  asdfghjkl", 12, 1);
+  ggl.writeGrayString(45, 30, "zxcvbnm,. <>", 12, 1);
+
+  ggl.drawCircle(10, 45, 10, 1);
+  ggl.drawLine(25, 45, 45, 45, 1);
+
   ggl.displayGray();
   delay(5000);
 }

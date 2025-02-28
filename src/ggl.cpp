@@ -478,6 +478,63 @@ void GGL::writeGrayChar(unsigned char x, unsigned char y, char acsii, char size,
     }
   }
 }
+void GGL::writeGrayChar(unsigned char x, unsigned char y, char acsii, char size, char mode, int color)
+{
+  unsigned char i, j, y0 = y;
+  char temp;
+  unsigned char ch = acsii - ' ';
+  
+  for (i = 0; i < size; i++)
+  {
+    if (size == 12)
+    {
+      if (mode)
+        temp = pgm_read_byte(&Font1206[ch][i]);
+      else
+        temp = ~pgm_read_byte(&Font1206[ch][i]);
+    }
+    else
+    {
+      if (mode)
+        temp = pgm_read_byte(&Font1608[ch][i]);
+      else
+        temp = ~pgm_read_byte(&Font1608[ch][i]);
+    }
+
+    for (j = 0; j < 8; j++) // Цикл, который выполняется 8 раз
+    {
+      if (temp & 0x80) // Если старший бит в temp равен 1
+      {
+        GGL::pixelGray(x, y, 1); // Рисуем белый пиксель на текущей строке
+
+        if (color == 1) // Если цвет black, дублируем бит
+          GGL::pixelGray(x, y + 1, 1); // Рисуем белый пиксель на строке ниже
+        else if (color == 2) // Если цвет gray, второй бит равен нулю
+          GGL::pixelGray(x, y + 1, 0); // Рисуем черный пиксель на строке ниже
+      }
+      else
+      {
+        GGL::pixelGray(x, y, 0); // Рисуем черный пиксель на текущей строке
+
+        if (color == 1) // Если цвет black, дублируем бит
+          GGL::pixelGray(x, y + 1, 0); // Рисуем черный пиксель на строке ниже
+        else if (color == 2) // Если цвет gray, второй бит равен нулю
+          GGL::pixelGray(x, y + 1, 0); // Рисуем черный пиксель на строке ниже
+      }
+
+      temp <<= 1; // Сдвигаем temp на один бит влево
+
+      y += 2; // Переходим к следующему пикселю вниз (пропускаем строку)
+
+      if ((y - y0) >= size * 2) // Если мы достигли конца строки (учитываем удвоение строк)
+      {
+        y = y0; // Возвращаемся к началу строки
+        x++;    // Переходим к следующему столбцу
+        break;  // Выходим из цикла
+      }
+    }
+  }
+}
 
 void GGL::drawSine(uint16_t y, uint16_t a, uint16_t n, uint16_t color)
 {

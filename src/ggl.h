@@ -91,9 +91,6 @@ public:
     void clearBuffer();
     void drawGrayBMP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *bitmap);
     void drawXBMP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *bitmap);
-
-    /*изменениея*/
-    void drawText(int x, int y, const String &text, const uint8_t *font);
 };
 
 

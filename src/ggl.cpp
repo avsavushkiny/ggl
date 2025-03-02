@@ -274,32 +274,6 @@ void GGL::displayGray()
   }
 }
 
-/*изменениея*/
-void GGL::drawText(int x, int y, const String &text, const uint8_t *font)
-{
-  int cursorX = x; // Начальная позиция по X
-  int cursorY = y; // Начальная позиция по Y
-
-  // Проходим по каждому символу в строке
-  for (int i = 0; i < text.length(); i++)
-  {
-    char currentChar = text.charAt(i); // Текущий символ
-
-    // Вычисляем смещение в массиве font для текущего символа
-    // Предположим, что символы идут последовательно, начиная с ' ' (пробел)
-    int charIndex = currentChar - ' '; // Индекс символа в массиве font
-
-    // Вычисляем указатель на bitmap текущего символа
-    const uint8_t *charBitmap = font + charIndex * 10; // 15 байт на символ
-
-    // Выводим символ с помощью bitmapGray
-    GGL::bitmapGray(cursorX, cursorY, charBitmap, 5, 10);
-
-    // Сдвигаем курсор для следующего символа
-    cursorX += 5; // Ширина символа + 1 пиксель для пробела между символами
-  }
-}
-
 void GGL::writeChar1616(int x, int y, int chChar)
 {
   int i, j;

@@ -45,6 +45,13 @@ private:
     void SPIWrite_byte(int dat);
 
 public:
+    enum Color
+    {
+        BLACK,
+        DARK_GRAY,
+        LIGHT_GRAY,
+        WHITE
+    };
     /* setup display */
     void begin();
     void display();
@@ -60,10 +67,9 @@ public:
     void writeChar1616(int x,int y,int chChar);
     void writeChar3216(int x, int y, int chChar);
     void writeString(int x, int y, const char *pString, int Size, int Mode);
-    void writeGrayChar(unsigned char x, unsigned char y, char acsii, char size, char mode);
-    void writeGrayChar(unsigned char x, unsigned char y, char acsii, char size, char mode, int color);
-    //!
-    void writeGrayString(int x, int y, const char *pString, int Size, int Mode);
+    /* Gray mode */
+    void writeGrayChar(unsigned char x, unsigned char y, char acsii, char size, char mode, Color color);
+    void writeGrayString(int x, int y, const char *pString, int Size, int Mode, Color color);
     /* draw */
     void drawSine(uint16_t y,uint16_t a,uint16_t n,uint16_t color);
     void drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color);

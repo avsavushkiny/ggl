@@ -408,7 +408,7 @@ void GGL::writeChar(unsigned char x, unsigned char y, char acsii, char size, cha
 }
 
 // Gray
-void GGL::writeGrayString(int x, int y, const char *pString, int Size, int Mode)
+void GGL::writeGrayString(int x, int y, const char *pString, int Size, int Mode, Color color)
 {
   int yy = y * 2;
 
@@ -424,17 +424,17 @@ void GGL::writeGrayString(int x, int y, const char *pString, int Size, int Mode)
       }
     }
 
-    GGL::writeGrayChar(x, yy, *pString, Size, Mode);
+    GGL::writeGrayChar(x, yy, *pString, Size, Mode, color);
     x += Size / 2;
     pString++;
   }
 }
-void GGL::writeGrayChar(unsigned char x, unsigned char y, char acsii, char size, char mode)
+void GGL::writeGrayChar(unsigned char x, unsigned char y, char acsii, char size, char mode, Color color)
 {
   unsigned char i, j, y0 = y;
   char temp;
   unsigned char ch = acsii - ' ';
-  
+
   for (i = 0; i < size; i++)
   {
     if (size == 12)
@@ -454,72 +454,62 @@ void GGL::writeGrayChar(unsigned char x, unsigned char y, char acsii, char size,
 
     for (j = 0; j < 8; j++) // Цикл, который выполняется 8 раз
     {
-      if (temp & 0x80)           // Если старший бит в temp равен 1
+      // Обработка битов в зависимости от цвета
+      switch (color)
       {
-        GGL::pixelGray(x, y, 1); // Рисуем белый пиксель на текущей строке
-        GGL::pixelGray(x, y + 1, 1); // Рисуем белый пиксель на строке ниже
-      }
-      else
-      {
-        GGL::pixelGray(x, y, 0); // Рисуем черный пиксель на текущей строке
-        GGL::pixelGray(x, y + 1, 0); // Рисуем черный пиксель на строке ниже
-      }
+      case BLACK:
+        if (temp & 0x80)
+        {
+          GGL::pixelGray(x, y, 1);     // Первый бит: 1
+          GGL::pixelGray(x, y + 1, 1); // Второй бит: 1
+          break;
+        }
+        else
+        {
+          GGL::pixelGray(x, y, 0);     // Первый бит: 0
+          GGL::pixelGray(x, y + 1, 0); // Второй бит: 0
+          break;
+        }
 
-      temp <<= 1; // Сдвигаем temp на один бит влево
-
-      y += 2; // Переходим к следующему пикселю вниз (пропускаем строку)
-
-      if ((y - y0) >= size * 2) // Если мы достигли конца строки (учитываем удвоение строк)
-      {
-        y = y0; // Возвращаемся к началу строки
-        x++;    // Переходим к следующему столбцу
-        break;  // Выходим из цикла
-      }
-    }
-  }
-}
-void GGL::writeGrayChar(unsigned char x, unsigned char y, char acsii, char size, char mode, int color)
-{
-  unsigned char i, j, y0 = y;
-  char temp;
-  unsigned char ch = acsii - ' ';
-  
-  for (i = 0; i < size; i++)
-  {
-    if (size == 12)
-    {
-      if (mode)
-        temp = pgm_read_byte(&Font1206[ch][i]);
-      else
-        temp = ~pgm_read_byte(&Font1206[ch][i]);
-    }
-    else
-    {
-      if (mode)
-        temp = pgm_read_byte(&Font1608[ch][i]);
-      else
-        temp = ~pgm_read_byte(&Font1608[ch][i]);
-    }
-
-    for (j = 0; j < 8; j++) // Цикл, который выполняется 8 раз
-    {
-      if (temp & 0x80) // Если старший бит в temp равен 1
-      {
-        GGL::pixelGray(x, y, 1); // Рисуем белый пиксель на текущей строке
-
-        if (color == 1) // Если цвет black, дублируем бит
-          GGL::pixelGray(x, y + 1, 1); // Рисуем белый пиксель на строке ниже
-        else if (color == 2) // Если цвет gray, второй бит равен нулю
-          GGL::pixelGray(x, y + 1, 0); // Рисуем черный пиксель на строке ниже
-      }
-      else
-      {
-        GGL::pixelGray(x, y, 0); // Рисуем черный пиксель на текущей строке
-
-        if (color == 1) // Если цвет black, дублируем бит
-          GGL::pixelGray(x, y + 1, 0); // Рисуем черный пиксель на строке ниже
-        else if (color == 2) // Если цвет gray, второй бит равен нулю
-          GGL::pixelGray(x, y + 1, 0); // Рисуем черный пиксель на строке ниже
+      case DARK_GRAY:
+        if (temp & 0x80)
+        {
+          GGL::pixelGray(x, y, 0);     // Первый бит: 0
+          GGL::pixelGray(x, y + 1, 1); // Второй бит: 1
+          break;
+        }
+        else
+        {
+          GGL::pixelGray(x, y, 0);     // Первый бит: 0
+          GGL::pixelGray(x, y + 1, 0); // Второй бит: 0
+          break;
+        }
+      case LIGHT_GRAY:
+        if (temp & 0x80)
+        {
+          GGL::pixelGray(x, y, 1);     // Первый бит: 1
+          GGL::pixelGray(x, y + 1, 0); // Второй бит: 0
+          break;
+        }
+        else
+        {
+          GGL::pixelGray(x, y, 0);     // Первый бит: 0
+          GGL::pixelGray(x, y + 1, 0); // Второй бит: 0
+          break;
+        }
+      case WHITE:
+        if (temp & 0x80)
+        {
+          GGL::pixelGray(x, y, 0);     // Первый бит: 0
+          GGL::pixelGray(x, y + 1, 0); // Второй бит: 0
+          break;
+        }
+        else
+        {
+          GGL::pixelGray(x, y, 0);     // Первый бит: 0
+          GGL::pixelGray(x, y + 1, 0); // Второй бит: 0
+          break;
+        }
       }
 
       temp <<= 1; // Сдвигаем temp на один бит влево

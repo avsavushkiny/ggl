@@ -6,7 +6,7 @@ GGL ggl; Bitmaps bmp; FPS fps;
 
 void setup() 
 {
-  ggl.begin();
+  ggl.gray.begin();
 }
 
 void loop()
@@ -20,8 +20,15 @@ void loop()
 
 
   // gray
-  ggl.clearBuffer();
-  ggl.bitmapGray(0, 120, bmp.cd, 40, 40);
+  ggl.gray.clearBuffer();
+  ggl.gray.bitmap(0, 120, bmp.cd, 40, 40);
+  ggl.gray.bitmap(40, 120, bmp.cd, 40, 40);
+  ggl.gray.bitmap(80, 120, bmp.cd, 40, 40);
+  ggl.gray.bitmap(120, 120, bmp.cd, 40, 40);
+  ggl.gray.bitmap(160, 120, bmp.cd, 40, 40);
+  ggl.gray.bitmap(200, 120, bmp.cd, 40, 40);
+  ggl.gray.bitmap(0, 80, bmp.cd, 40, 40);
+
   // ggl.bitmapGray(10, 10, bmp.cursor_b, 7, 10);
 
   // ggl.writeGrayString(45, 0, "QWERTYUIOP 0123456789", 12, 1, ggl.BLACK);
@@ -55,12 +62,12 @@ void loop()
   // ggl.drawGrayTable(0, 50, 3, 3, 20, 20, tableData, ggl.BLACK, ggl.BLACK, ggl.LIGHT_GRAY);
 
   // Обновляем счетчик FPS
-  // fps.updateFPS();
-  // fps.drawGrayFPS(0, 100, ggl.BLACK);
-  ggl.writeGrayString(0, 30, "*0(12+23)-4g./cf,d", 10, 1, ggl.BLACK);
-  ggl.writeGrayString(0, 40, "QWERT(SUIU)OP ASDFGHJKL ZXCVBNM", 10, 1, ggl.BLACK);
-  ggl.writeGrayString(0, 50, "qwertyuiop asdfghjkl zxcvbnm", 10, 1, ggl.DARK_GRAY);
-  ggl.writeGrayString(0, 60, "0123456789 0123456789", 10, 1, ggl.LIGHT_GRAY);
+  fps.updateFPS();
+  fps.drawGrayFPS(0, 10, ggl.gray.BLACK);
+  ggl.gray.writeString(0, 30, "*0(12+23)-4g./cf,d", 10, 1, ggl.gray.BLACK);
+  ggl.gray.writeString(0, 40, "QWERT(SUIU)OP ASDFGHJKL ZXCVBNM", 10, 1, ggl.gray.BLACK);
+  ggl.gray.writeString(0, 50, "qwertyuiop asdfghjkl zxcvbnm", 10, 1, ggl.gray.DARK_GRAY);
+  ggl.gray.writeString(0, 60, "0123456789 0123456789", 10, 1, ggl.gray.LIGHT_GRAY);
   
-  ggl.displayGray();
+  ggl.gray.display();
 }

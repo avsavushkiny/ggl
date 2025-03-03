@@ -449,19 +449,19 @@ void GGL::writeGrayChar(short x, short y, char acsii, char size, char mode, Colo
 
   for (i = 0; i < size; i++)
   {
-    if (size == 12)
+    if (size == 10)
+    {
+      if (mode)
+        temp = pgm_read_byte(&Font1006[ch][i]);
+      else
+        temp = ~pgm_read_byte(&Font1006[ch][i]);
+    }
+    else
     {
       if (mode)
         temp = pgm_read_byte(&Font1206[ch][i]);
       else
         temp = ~pgm_read_byte(&Font1206[ch][i]);
-    }
-    else
-    {
-      if (mode)
-        temp = pgm_read_byte(&Font1608[ch][i]);
-      else
-        temp = ~pgm_read_byte(&Font1608[ch][i]);
     }
 
     for (j = 0; j < 8; j++)

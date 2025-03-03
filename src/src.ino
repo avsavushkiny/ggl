@@ -57,8 +57,10 @@ void loop()
   // Обновляем счетчик FPS
   // fps.updateFPS();
   // fps.drawGrayFPS(0, 100, ggl.BLACK);
-
-  ggl.writeGrayString(0, 100, "ABCDEFJ", 12, 1, ggl.BLACK);
+  ggl.writeGrayString(0, 30, "*0(12+23)-4g./cf,d", 10, 1, ggl.BLACK);
+  ggl.writeGrayString(0, 40, "QWERT(SUIU)OP ASDFGHJKL ZXCVBNM", 10, 1, ggl.BLACK);
+  ggl.writeGrayString(0, 50, "qwertyuiop asdfghjkl zxcvbnm", 10, 1, ggl.DARK_GRAY);
+  ggl.writeGrayString(0, 60, "0123456789 0123456789", 10, 1, ggl.LIGHT_GRAY);
   
   ggl.displayGray();
 }

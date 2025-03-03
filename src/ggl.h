@@ -67,10 +67,10 @@ public:
     void writeChar(unsigned char x, unsigned char y, char acsii, char size, char mode);
     void writeChar1616(int x,int y,int chChar);
     void writeChar3216(int x, int y, int chChar);
-    void writeString(int x, int y, const char *pString, int Size, int Mode);
+    void writeString(int x, int y, String str, int Size, int Mode);
     
     /* Gray mode */
-    void writeGrayChar(unsigned char x, unsigned char y, char acsii, char size, char mode, Color color);
+    void writeGrayChar(short x, short y, char acsii, char size, char mode, Color color);
     void writeGrayString(int x, int y, const char *pString, int Size, int Mode, Color color);
     void writeGrayString(int x, int y, const String &text, int Size, int Mode, Color color);
 
@@ -138,6 +138,10 @@ const int Font1612[11][32]  =
 	0x31,0x8C,0x31,0x8C,0x31,0x8C,0x31,0x8C,0x31,0x8C,0x3F,0xFC,0x3F,0xFC,0x00,0x00},/*"9",9*/
 	{0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x18,0x30,
 	0x18,0x30,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},/*":",10*/
+};
+
+const int Font1006[95][20] = { // vertical scan
+     
 };
 
 const int Font1206[95][24]  = {
@@ -424,16 +428,14 @@ public:
     }
 
     // Метод для отрисовки FPS на экране
-    void drawFPS(int x, int y, Color color)
+    void drawGrayFPS(int x, int y, Color color)
     {
-        // char buffer[16];
-        // snprintf(buffer, sizeof(buffer), "FPS: %d", _fps); // Форматируем строку
-        // GGL::writeGrayChar(x, yy, buffer[0], 12, 1, color); // Отрисовываем первый символ
-        // for (int i = 1; i < strlen(buffer); i++)
-        // {
-        //     GGL::writeGrayChar(x + i * 8, yy, buffer[i], 12, 1, color); // Отрисовываем остальные символы
-        // }
         GGL::writeGrayString(x, y, (String)_fps, 12, 1, color);
+    }
+
+    void drawFps(int x, int y)
+    {
+        GGL::writeString(x, y, (String)_fps, 12, 1); // Отрисовываем остальные символы
     }
 
 private:

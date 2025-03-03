@@ -268,10 +268,12 @@ void GGL::bitmap(int x, int y, const int *pBmp, int chWidth, int chHeight)
     }
   }
 }
-void GGL::writeString(int x, int y, const char *pString, int Size, int Mode)
+void GGL::writeString(int x, int y, String str, int Size, int Mode)
 {
+  const char *pString = str.c_str(); // Получаем C-строку из String
+  int len = str.length();            // Получаем длину строки
 
-  while (*pString != '\0')
+  for (int i = 0; i < len; ++i)
   {
     if (x > (_WIDTH - Size / 2))
     {
@@ -283,9 +285,8 @@ void GGL::writeString(int x, int y, const char *pString, int Size, int Mode)
       }
     }
 
-    GGL::writeChar(x, y, *pString, Size, Mode);
+    GGL::writeChar(x, y, pString[i], Size, Mode);
     x += Size / 2;
-    pString++;
   }
 }
 void GGL::writeChar(unsigned char x, unsigned char y, char acsii, char size, char mode)
@@ -439,9 +440,10 @@ void GGL::writeGrayString(int x, int y, const String &text, int Size, int Mode, 
     x += Size / 2; // Сдвиг позиции для следующего символа
   }
 }
-void GGL::writeGrayChar(unsigned char x, unsigned char y, char acsii, char size, char mode, Color color)
+
+void GGL::writeGrayChar(short x, short y, char acsii, char size, char mode, Color color)
 {
-  unsigned char i, j, y0 = y;
+  short i, j, y0 = y;
   char temp;
   unsigned char ch = acsii - ' ';
 
@@ -462,7 +464,7 @@ void GGL::writeGrayChar(unsigned char x, unsigned char y, char acsii, char size,
         temp = ~pgm_read_byte(&Font1608[ch][i]);
     }
 
-    for (j = 0; j < 8; j++) // Цикл, который выполняется 8 раз
+    for (j = 0; j < 8; j++)
     {
       // Обработка битов в зависимости от цвета
       switch (color)
@@ -524,7 +526,7 @@ void GGL::writeGrayChar(unsigned char x, unsigned char y, char acsii, char size,
 
       temp <<= 1; // Сдвигаем temp на один бит влево
 
-      y += 2; // Переходим к следующему пикселю вниз (пропускаем строку)
+      y += 2;
 
       if ((y - y0) >= size * 2) // Если мы достигли конца строки (учитываем удвоение строк)
       {

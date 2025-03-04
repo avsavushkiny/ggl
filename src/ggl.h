@@ -39,34 +39,82 @@ public:
         WHITE
     };
 
+    /* Settings */
     void begin();
-    void display();
     void clear();
-    void sendBuffer(); 
     void clearBuffer();
+    void display();
+    void sendBuffer(); 
+    
+    /* Bitmap */
+    void pixel(short x, short y, char color);
+    void bitmap(short x, short y, const uint8_t *pBmp, short chWidth, short chHeight);
 
-    void pixel(int x, int y, char color);
-    void bitmap(int x,int y,const uint8_t *pBmp, int chWidth, int chHeight);
-
+    /* Write */
     void writeChar(short x, short y, char acsii, char size, char mode, Color color);
-    void writeString(int x, int y, const char *pString, int Size, int Mode, Color color);
-    void writeString(int x, int y, const String &text, int Size, int Mode, Color color);
+    void writeLine(short x, short y, const char *pString, int8_t Size, int8_t Mode, Color color);
+    void writeLine(short x, short y, const String &text, int8_t Size, int8_t Mode, Color color);
+    void writeLine(short x, short y, int number, int8_t Size, int8_t Mode, Color color);
 
-    /* Draw gray-mode */
-    void drawPixel(int x, int y, Color color);
-    void drawFillFrame(int x, int y, int w, int h, Color borderColor, Color fillColor);
-    void drawFrame(int x, int y, int w, int h, Color borderColor);
-    void drawRoundedFrame(int x, int y, int w, int h, int r, Color borderColor, Color fillColor);
-    void drawFillCircle(int x0, int y0, int r, Color borderColor, Color fillColor);
-    void drawCircle(int x0, int y0, int r, Color color);
-    void drawTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color borderColor, Color fillColor);
-    void drawHLine(int x, int y, int length, Color color, int w);
-    void drawVLine(int x, int y, int length, Color color, int w);
-    void drawBox(int x, int y, int w, int h, Color fillColor);
-    void drawLine(int x0, int y0, int x1, int y1, Color color);
+    /* Draw geometric primitives */
+    void drawPixel(short x, short y, Color color);
+    void drawFillFrame(short x, short y, short w, short h, Color borderColor, Color fillColor);
+    void drawFrame(short x, short y, short w, short h, Color borderColor);
+    void drawRoundedFrame(short x, short y, int w, int h, int r, Color borderColor, Color fillColor);
+    void drawFillCircle(short x0, short y0, short r, Color borderColor, Color fillColor);
+    void drawCircle(short x0, short y0, short r, Color color);
+    void drawTriangle(short x0, short y0, short x1, short y1, short x2, short y2, Color borderColor, Color fillColor);
+    void drawHLine(short x, short y, short length, Color color, int8_t w);
+    void drawVLine(short x, short y, short length, Color color, int8_t w);
+    void drawBox(short x, short y, short w, short h, Color fillColor);
+    void drawLine(short x0, short y0, short x1, short y1, Color color);
     void drawSine(uint16_t y, uint16_t a, uint16_t n, Color color);
 
-    void drawTable(int x, int y, int rows, int cols, int cellWidth, int cellHeight, const char* data, Color borderColor, Color textColor, Color bgColor);
+    /* Draw table */
+    void drawTable(short x, short y, short rows, short cols, short cellWidth, short cellHeight, const char* data, Color borderColor, Color textColor, Color bgColor);
+private:
+    /* chip ESP32 SPI hardware */
+    const uint8_t LCD_BL{0};
+    const uint8_t LCD_DC{17};
+    const uint8_t LCD_RST{16};
+    const uint8_t LCD_CS{5};
+    const uint8_t LCD_SCK{18};
+    const uint8_t LCD_MOSI{23};
+    /* Methods for sending data and commands */
+    void rotate(int ROTATE);
+    void transferCommand(int cmd);
+    void transferData(int dat);
+    void SPIWrite_byte(int dat);
+};
+
+class MONOCHROME
+{
+public:
+    /* Settings */
+    void begin();
+    void clear();
+    void clearBuffer();
+    void display();
+    void sendBuffer();
+
+    /* Bitmap */
+    void pixel(short x, short y, int8_t color);
+    void bitmap(short x, short y, const int *pBmp, short chWidth, short chHeight);
+    void drawXBMP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *bitmap);
+    
+    /* Write */
+    void writeChar(short x, short y, char acsii, int8_t size, int8_t mode);
+    void writeLine(int x, int y, String str, int8_t Size, int8_t Mode);
+
+    /* Draw geometric primitives */
+    void drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color);
+    void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color);
+    void drawRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color);
+    void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color);
+    void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
+    void drawRoundRect(int16_t x, int16_t y, int16_t w, int16_t h, int16_t r, uint16_t color);
+    void drawTriangle(int16_t x0, int16_t y0, int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint16_t color);
+    
 private:
     /* chip ESP32 SPI hardware */
     const uint8_t LCD_BL{0};
@@ -81,51 +129,6 @@ private:
     void transferData(int dat);
     void SPIWrite_byte(int dat);
 };
-
-// class MONOCHROME
-// {
-// public:
-//     /* setup display */
-//     void begin();
-//     void display();
-
-//     void clear();
-//     void pixel(int x, int y, char color);
-//     void bitmap(int x, int y, const int *pBmp, int chWidth, int chHeight);
-
-//     void drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color);
-//     void drawCircleHelper( int16_t x0, int16_t y0,int16_t r, int cornername, uint16_t color);
-//     void drawLine(int16_t x0, int16_t y0,int16_t x1, int16_t y1,uint16_t color);
-//     void drawRect(int16_t x, int16_t y,int16_t w, int16_t h,uint16_t color);
-//     void drawFastVLine(int16_t x, int16_t y,int16_t h, uint16_t color);
-//     void drawFastHLine(int16_t x, int16_t y,int16_t w, uint16_t color);
-//     void drawRoundRect(int16_t x, int16_t y, int16_t w,int16_t h, int16_t r, uint16_t color);
-//     void drawTriangle(int16_t x0, int16_t y0,int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color);
-
-//     void drawFillCircle(int16_t x0, int16_t y0, int16_t r,uint16_t color);
-//     void drawFillCircleHelper(int16_t x0, int16_t y0, int16_t r,int cornername, int16_t delta, uint16_t color);
-//     void drawFillRect(int16_t x, int16_t y, int16_t w, int16_t h,uint16_t color);
-//     void drawFillRoundRect(int16_t x, int16_t y, int16_t w,int16_t h, int16_t r, uint16_t color);
-//     void drawFillTriangle(int16_t x0, int16_t y0,int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color);
-
-//     /* copies of methods from the u8g2 library */
-//     void clearBuffer();
-//     void drawGrayBMP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *bitmap);
-//     void drawXBMP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *bitmap);
-// private:
-//     /* chip ESP32 SPI hardware */
-//     const uint8_t LCD_BL{0};
-//     const uint8_t LCD_DC{17};
-//     const uint8_t LCD_RST{16};
-//     const uint8_t LCD_CS{5};
-//     const uint8_t LCD_SCK{18};
-//     const uint8_t LCD_MOSI{23};
-
-//     void rotate(int ROTATE);
-//     void transferCommand(int cmd);
-//     void transferData(int dat);
-//     void SPIWrite_byte(int dat);
-// };
 
 class GGL
 {
@@ -145,7 +148,7 @@ private:
 
 public:
     GRAY gray;
-    // MONOCHROME Monochrome;
+    MONOCHROME monochrome;
 
     // enum Color
     // {
@@ -154,65 +157,6 @@ public:
     //     LIGHT_GRAY,
     //     WHITE
     // };
-    // /* setup display */
-    // void begin();
-    // void display();
-    /* write bitmap-data */
-    // void clear();
-    // void pixel(int x, int y, char color);
-    // void bitmap(int x, int y, const int *pBmp, int chWidth, int chHeight);
-    // void pixelGray(int x, int y, char color);
-    // void displayGray();
-    // void sendGrayBuffer();
-    // void bitmapGray(int x,int y,const uint8_t *pBmp, int chWidth, int chHeight);
-    // /* write data */
-    // void writeChar(unsigned char x, unsigned char y, char acsii, char size, char mode);
-    // void writeChar1616(int x,int y,int chChar);
-    // void writeChar3216(int x, int y, int chChar);
-    // void writeString(int x, int y, String str, int Size, int Mode);
-    
-    // /* Gray mode */
-    // void writeGrayChar(short x, short y, char acsii, char size, char mode, Color color);
-    // void writeGrayString(int x, int y, const char *pString, int Size, int Mode, Color color);
-    // void writeGrayString(int x, int y, const String &text, int Size, int Mode, Color color);
-
-    // /* Draw gray-mode */
-    // void drawGrayPixel(int x, int y, Color color);
-    // void drawGrayFillFrame(int x, int y, int w, int h, Color borderColor, Color fillColor);
-    // void drawGrayFrame(int x, int y, int w, int h, Color borderColor);
-    // void drawGrayRoundedFrame(int x, int y, int w, int h, int r, Color borderColor, Color fillColor);
-    // void drawGrayFillCircle(int x0, int y0, int r, Color borderColor, Color fillColor);
-    // void drawGrayCircle(int x0, int y0, int r, Color color);
-    // void drawGrayTriangle(int x0, int y0, int x1, int y1, int x2, int y2, Color borderColor, Color fillColor);
-    // void drawGrayHLine(int x, int y, int length, Color color, int w);
-    // void drawGrayVLine(int x, int y, int length, Color color, int w);
-    // void drawGrayBox(int x, int y, int w, int h, Color fillColor);
-    // void drawGrayLine(int x0, int y0, int x1, int y1, Color color);
-    // void drawGraySine(uint16_t y, uint16_t a, uint16_t n, Color color);
-
-    // /* Draw Table */
-    // void drawGrayTable(int x, int y, int rows, int cols, int cellWidth, int cellHeight, const char* data, Color borderColor, Color textColor, Color bgColor);
-    
-    // // Draw
-    // void drawCircle(uint16_t x0, uint16_t y0, uint16_t r, uint16_t color);
-    // void drawCircleHelper( int16_t x0, int16_t y0,int16_t r, int cornername, uint16_t color);
-    // void drawLine(int16_t x0, int16_t y0,int16_t x1, int16_t y1,uint16_t color);
-    // void drawRect(int16_t x, int16_t y,int16_t w, int16_t h,uint16_t color);
-    // void drawFastVLine(int16_t x, int16_t y,int16_t h, uint16_t color);
-    // void drawFastHLine(int16_t x, int16_t y,int16_t w, uint16_t color);
-    // void drawRoundRect(int16_t x, int16_t y, int16_t w,int16_t h, int16_t r, uint16_t color);
-    // void drawTriangle(int16_t x0, int16_t y0,int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color);
-
-    // void drawFillCircle(int16_t x0, int16_t y0, int16_t r,uint16_t color);
-    // void drawFillCircleHelper(int16_t x0, int16_t y0, int16_t r,int cornername, int16_t delta, uint16_t color);
-    // void drawFillRect(int16_t x, int16_t y, int16_t w, int16_t h,uint16_t color);
-    // void drawFillRoundRect(int16_t x, int16_t y, int16_t w,int16_t h, int16_t r, uint16_t color);
-    // void drawFillTriangle(int16_t x0, int16_t y0,int16_t x1, int16_t y1,int16_t x2, int16_t y2, uint16_t color);
-
-    // /* copies of methods from the u8g2 library */
-    // void clearBuffer();
-    // void drawGrayBMP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *bitmap);
-    // void drawXBMP(int16_t x, int16_t y, int16_t w, int16_t h, const uint8_t *bitmap);
 };
 
 /* Fonts */
@@ -626,7 +570,7 @@ public:
     // Метод для отрисовки FPS на экране
     void drawGrayFPS(int x, int y, GRAY::Color color)
     {
-        GRAY::writeString(x, y, (String)_fps, 12, 1, color);
+        GRAY::writeLine(x, y, (String)_fps, 10, 1, color);
     }
 
     // void drawFps(int x, int y)

@@ -30,17 +30,17 @@ void GRAY::begin()
   digitalWrite(LCD_RST, HIGH);
   delay(10);
 
-  transferCommand(0x30); // Extension Command 0
-  transferCommand(0x94); // Sleep Out
+  transferCommand(0x30); // 0011 0000 EC1
+  transferCommand(0x94); // 1001 0100 Sleep out mode
   delay(50);
 
-  transferCommand(0x31); // Extension Command 1
-  transferCommand(0x32); // Analog Circuit Set
-  transferData(0x00);
-  transferData(0x01);
-  transferData(0x03);
-  transferCommand(0x51); // Booster Level x10
-  transferData(0xFA);    // 8X
+  transferCommand(0x31); // 0011 0001 EC2
+  transferCommand(0x32); // 0011 0010 Analog Circuit Set
+  transferData(0x00);    // 0000 0000
+  transferData(0x01);    // 0000 0001
+  transferData(0x03);    // 0000 0011
+  transferCommand(0x51); // 0101 0001 Booster Level x10
+  transferData(0xfb);    // 1111 1011 [0xfb]x10 [0xfa]x8
 
   transferCommand(0x30);
   transferCommand(0x75);

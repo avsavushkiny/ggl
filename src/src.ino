@@ -69,5 +69,6 @@ void loop()
   ggl.gray.writeString(0, 50, "qwertyuiop asdfghjkl zxcvbnm", 10, 1, ggl.gray.DARK_GRAY);
   ggl.gray.writeString(0, 60, "0123456789 0123456789", 10, 1, ggl.gray.LIGHT_GRAY);
   
-  ggl.gray.display();
+  ggl.gray.sendBuffer();
+  // ggl.gray.display();
 }

@@ -31,52 +31,54 @@ void GRAY::begin()
   delay(10);
 
   transferCommand(0x30); // 0011 0000 EC1
-  transferCommand(0x94); // 1001 0100 Sleep out mode
+  transferCommand(0x94); // 1001 0100 Sleep out mode [6]
   delay(50);
 
   transferCommand(0x31); // 0011 0001 EC2
-  transferCommand(0x32); // 0011 0010 Analog Circuit Set
+
+  transferCommand(0x32); // 0011 0010 Analog Circuit Set [32]
   transferData(0x00);    // 0000 0000
   transferData(0x01);    // 0000 0001
   transferData(0x03);    // 0000 0011
-  transferCommand(0x51); // 0101 0001 Booster Level x10
+
+  transferCommand(0x51); // 0101 0001 Booster Level x10 [33]
   transferData(0xfb);    // 1111 1011 [0xfb]x10 [0xfa]x8
 
-  transferCommand(0x30);
-  transferCommand(0x75);
-  transferData(0x00);
-  transferData(0x28);
-  transferCommand(0x15);
-  transferData(0x00);
-  transferData(0xFF); // xe 256
+  transferCommand(0x30); // 0011 0000 EC1
 
-  transferData(0xA6);
+  transferCommand(0x75); // 0111 0101 Set page address [7]
+  transferData(0x00);    // 0000 0000 dec:0
+  transferData(0x28);    // 0010 1000 dec:40
 
-  transferCommand(0x30); // Extension Command 0
-  transferCommand(0x20); // Power Control
-  transferData(0x0b);    // VB ON ; VR,VF ON
+  transferCommand(0x15); // 0001 0101 Set column address [8]
+  transferData(0x00);    // 0000 0000 dec:0
+  transferData(0xFF);    // 1111 1111 dec:256
+  // transferData(0xA6);    // 1010 0110 dec:166 ???
 
-  transferCommand(0x81); // Vop Control
+  transferCommand(0x30); // 0011 0000 EC1
+  transferCommand(0x20); // 0010 0000 Power Control [20]
+  transferData(0x0b);    // 0000 1011 VB ON ; VR,VF ON
+
+  transferCommand(0x81); // 1000 0001 Vop Control [21]
   transferData(Contrast & 0x3F);
   transferData((Contrast >> 6) & 0x07);
 
-  transferCommand(0x0C); // Data Format Select     DO=1; LSB on top
-  transferCommand(0xf0); // Display Mode
-  // transferData(0x10);    // Monochrome Mode
-  transferData(0x11);    // Gray Mode
+  transferCommand(0x0C); // 0000 1100 Data Format Select   DO=1; LSB on top [27]
+  
+  transferCommand(0xf0); // 1111 0000 Display Mode [28]
+  transferData(0x11);    // 0001 0001 Gray Mode[0x11] Monochrome Mode[0x10]
 
-  transferCommand(0xCA); // Display Control
-  transferData(0x00);
-  transferData(0x9f); // duty 160
-  transferData(0x00);
+  transferCommand(0xCA); // 1100 1010 Display Control [5]
+  transferData(0x00);    // 0000 0000 Set CL diving ratio 
+  transferData(0x9f);    // 1001 1111 Set the number duty dec:159
+  transferData(0x00);    // 0000 0000 Set the inversion type frame
 
-  transferCommand(0xBC); // Data Scan Direction
-  transferData(0x00);    // MY=0
+  transferCommand(0xBC); // 1011 1100 Data Scan Direction [9]
+  transferData(0x00);    // 0000 0000
 
-  transferCommand(0xaf); // Display On
+  transferCommand(0xaf); // 1010 1111 Display On [2]
 
-  digitalWrite(LCD_BL, 0x01);
-  // digitalWrite(LCD_BL, 1);
+  digitalWrite(LCD_BL, 0x01); // BL on[0x00] off[0x01]
 }
 void GRAY::clear()
 {
@@ -106,33 +108,34 @@ void GRAY::display()
 {
   int page, i;
 
-  transferCommand(0xf0); // Display Mode
-  transferData(0x11);    // 4Gray  Mode
+  transferCommand(0xf0); // 1111 0000 Display Mode [28]
+  transferData(0x11);    // 0001 0001 Gray Mode[0x11] Monochrome Mode[0x10]
 
-  transferCommand(0x15); // Clumn Address setting
-  transferData(0x00);    // XS = 0
-  transferData(0xff);    // XE = 256
-  transferCommand(0x75); // Page Adress setting
-  transferData(0x00);    // XS = 0
-  transferData(0x28);    // XE = 159 [0x28]
-  transferCommand(0x5c); // ?
+  transferCommand(0x15); // 0001 0101 Clumn Address setting
+  transferData(0x00);    // 0000 0000 XS = 0
+  transferData(0xff);    // 1111 1111 XE = 255
+  transferCommand(0x75); // 0111 0101 Set page address [7]
+  transferData(0x00);    // 0000 0000 XS = 0
+  transferData(0x28);    // 0010 1000 XE = 40
+  transferCommand(0x5c); // 0101 1100 Write data to DDRAM
 
   for (page = 0; page <= 40; page++) // 160/4 = 40
   {
     for (i = 0; i < 256; i++)
     {
-      transferData(_LCD_BUFFER[i + (page * 256)]);
+      transferData(_LCD_BUFFER[i + (page * 256)]); // Write data
     }
   }
 }
 void GRAY::sendBuffer()
 {
   int page, i;
+  transferCommand(0x5c); // 0101 1100 Write data to DDRAM
   for (page = 0; page < 160 / 4; page++)
   {
     for (i = 0; i < 256; i++)
     {
-      transferData(_LCD_BUFFER[i + (page * 256)]);
+      transferData(_LCD_BUFFER[i + (page * 256)]); // Write data
     }
   }
 }
@@ -188,7 +191,7 @@ void GRAY::SPIWrite_byte(int dat)
 // Gray-mode
 void GRAY::pixel(int x, int y, char color)
 {
-  GRAY::rotate(ROTATE_0);                            // Поворачиваем экран на 0 градусов
+  GRAY::rotate(ROTATE_0);                           // Поворачиваем экран на 0 градусов
   if (x > 256 || y > 256 * 2)                       // Если координаты пикселя находятся за пределами экрана
     return;                                         // Выходим из функции
   if (color)                                        // Если цвет пикселя не равен 0

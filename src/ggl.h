@@ -2,9 +2,9 @@
     [name]       Gray Graphic Library
     [chip]       ST75256 (display JLX256160-920)
     [resolution] 256x160
-    [version]    2.0
+    [version]    1.2
     [create]     Alexander Savushkin
-    [date]       02\03\2025
+    [date]       05\03\2025
     [e-mail]     aeondc@gmail.com
     [github]     https://github.com/avsavushkiny/ggl
 */
